@@ -19,6 +19,7 @@ void main() {
       ],
       locale: Locale("fa", "IR"),
       title: 'الکتروخانه',
+      // onGenerateRoute: ,
       home: Welcome(),
     ),
   );

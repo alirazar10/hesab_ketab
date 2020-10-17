@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/api_config.dart';
 import 'dart:convert';
 import 'hesab_ketab.dart';
@@ -27,36 +29,40 @@ class _LoginState extends State<Login> {
         "password": this._password,
       },
       headers: {
-        "Accept": 'application/json'
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": 'application/json',
       },
     );
     if(response.statusCode == 201){
       Map data = json.decode(response.body);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => HesabKetab(userData: data)));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // prefs.remove('users');
+      prefs.setString('user', json.encode(data['user']));
+      prefs.setString('access_token', data['access_token']);
+      Navigator.pushAndRemoveUntil(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => HesabKetab(userData: data)
+        ),
+        (Route<dynamic> route) => false
+      );
     }else{
       Map data = json.decode(response.body);
+      
       // set up the AlertDialog
       // Alert(context: context, title: "Error", desc: data['message']).show();
-      print(data['message']);
+      
       return createSnackBar(data['message']);
       
     }
   }
 
-  FocusNode myFocusNode;
 
   @override
   void initState() {
     super.initState();
-    myFocusNode = FocusNode();
   }
 
-  @override
-  void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    myFocusNode.dispose();
-    super.dispose();
-  }
   @override
   Widget build(BuildContext context) {
     scaffoldContext = context;
@@ -117,8 +123,6 @@ class _LoginState extends State<Login> {
                       SizedBox(height: 10,),
 
                       TextFormField(
-                        autofocus: true,
-                        focusNode: myFocusNode,
                         textDirection: TextDirection.ltr,
                         decoration: InputDecoration(
                           labelText: 'ایمیل: ',
@@ -142,7 +146,6 @@ class _LoginState extends State<Login> {
                       SizedBox(height: 10,),
                       TextFormField(
                         textDirection: TextDirection.ltr,
-                        focusNode: myFocusNode,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: 'پسورد: ',
@@ -163,20 +166,45 @@ class _LoginState extends State<Login> {
                         },
                       ),
                       SizedBox(height: 10,),
-                      Container(
-                        padding: EdgeInsets.only(top:20.0),
-                        child: RaisedButton(
-                          padding: EdgeInsets.all(10),
-                          color: Color(0xFFFF5722),
-                          child: Text('ورود', ),
-                          onPressed: (){
-                            if(_formKey.currentState.validate()){
-                              _formKey.currentState.save();
-                              login();
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(top:20.0),
+                            child: RaisedButton(
+                              padding: EdgeInsets.all(10),
+                              color: Color(0xFFFF5722),
+                              child: Text('ورود', style: myTextStyle( color: Colors.white, fontSize: 15.0),),
+                              onPressed: (){
+                                if(_formKey.currentState.validate()){
+                                  _formKey.currentState.save();
+                                  login();
 
-                            }
-                          }
-                        ),
+                                }
+                              }
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {                          
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(top:20.0),
+                              padding: EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Color(0xFFFF5722), width:2.0),
+                                borderRadius: BorderRadius.circular(3.0),
+                                color: Colors.transparent,
+                              ),
+                              child: Text(
+                                'حساب جدید ',
+                                style: myTextStyle( color: Color(0xff00BCD4), fontSize: 15.0),
+                              )
+                            ),
+                          ),
+                          
+                        ],
                       ),
                     ],
                   )
@@ -212,6 +240,7 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final _regFromKey = GlobalKey<FormState>();
+  final _registerScaffoldGlobalKye = GlobalKey<ScaffoldState>();
   static String p = r"^[a-zA-Z0-9._-][^<>!#$%&'*+\/=?^`{|}~]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
   RegExp _validEmail = RegExp(p);
   String _firstName;
@@ -232,21 +261,29 @@ class _RegisterState extends State<Register> {
         "password_confirmation":this._confirm_password
       },
       headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
         "Accept": 'application/json',
       }
     );
     if(response.statusCode == 201){
       Map data = json.decode(response.body);
-      
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('user', json.encode(data['user']));
+      prefs.setString('access_token', data['access_token']);
+
       Navigator.pushAndRemoveUntil(
         context, 
-        MaterialPageRoute(builder: (context) => HesabKetab(userData: data)),(Route<dynamic> route) => false
+        MaterialPageRoute(
+          builder: (context) => HesabKetab(userData: data)
+        ),
+        (Route<dynamic> route) => false
         // ModalRoute.withName("/HesabKetab") 
       );
     }else{
       Map data = json.decode(response.body);
       // set up the AlertDialog
-      Alert(context: context, title: "Error", desc:  data['errors']['username'][0]).show();
+      // Alert(context: context, title: "Error", desc:  data['errors']['username'][0]).show();
+      return createSnackBar(data['message']);
       
         
     }
@@ -263,6 +300,7 @@ class _RegisterState extends State<Register> {
     final _veiwInset = MediaQuery.of(context).viewInsets.bottom;
     
     return Scaffold(
+      key: _registerScaffoldGlobalKye,
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: Container(
@@ -391,20 +429,46 @@ class _RegisterState extends State<Register> {
                       ),
                       SizedBox(height: 10,),
 
-                      Container(
-                        padding: EdgeInsets.only(top:10.0),
-                        child: RaisedButton(
-                          padding: EdgeInsets.all(10),
-                          color: Color(0xFFFF5722),
-                          child: Text('ورود', ),
-                          onPressed: (){
-                            if(_regFromKey.currentState.validate()){
-                              _regFromKey.currentState.save();
-                              registration();
+                      Row(
+                        mainAxisAlignment:  MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(top:15.0),
+                            child: RaisedButton(
+                              padding: EdgeInsets.all(10),
+                              color: Color(0xFFFF5722),
+                              child: Text(' راجستر ', 
+                                style: myTextStyle( color: Colors.white, fontSize: 15.0),
+                              ),
+                              onPressed: (){
+                                if(_regFromKey.currentState.validate()){
+                                  _regFromKey.currentState.save();
+                                  registration();
 
-                            }
-                          }
-                        ),
+                                }
+                              }
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {                          
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(top:20.0),
+                              padding: EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Color(0xFFFF5722), width:2.0),
+                                borderRadius: BorderRadius.circular(3.0),
+                                // color: Colors.transparent,
+                              ),
+                              child: Text(
+                                'ورود به حساب ',
+                                style: myTextStyle( color: Color(0xff00BCD4), fontSize: 15.0),
+                              )
+                            ),
+                          ),
+                        ],
                       ),
                       
                     ],
@@ -417,5 +481,19 @@ class _RegisterState extends State<Register> {
         ),
       ),
     );
+  }
+  void createSnackBar(String message) {                                                                               
+    final snackBar = new SnackBar(
+      content: Container(
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Text(message)
+      ),                                                         
+      backgroundColor: Colors.red,
+      behavior: SnackBarBehavior.floating,
+      elevation: 6.0,
+    );                                                                                      
+
+    // Find the Scaffold in the Widget tree and use it to show a SnackBar!                                            
+    _registerScaffoldGlobalKye.currentState.showSnackBar(snackBar);                                                              
   }
 }

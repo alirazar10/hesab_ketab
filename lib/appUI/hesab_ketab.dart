@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'home.dart';
 import 'show_electricity.dart';
 import 'show_water.dart';
@@ -17,27 +18,34 @@ class _HesabKetabState extends State<HesabKetab> {
     return DefaultTabController(
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.blueGrey,
           actions: <Widget>[
             IconButton(icon: Icon(Icons.more_vert), onPressed: () { print('clicked'); },), 
             
           ],
           automaticallyImplyLeading: false,
-          title: Text('Hesab Ketab'),
+          title: Text('حساب کتاب'),
           centerTitle: true,
           titleSpacing: 10.0,
           bottom: TabBar(
+            // isScrollable: true,
             tabs: <Widget>[
               Tab(
-                icon: Icon(Icons.home), 
-                text: 'Home',
+                icon: Icon(Icons.home, size: 22.0,), 
+                // text: 'خانه',
+                child: Text('خانه', style: myTextStyle(fontSize: 14.0),),
+
               ),
               Tab(
-                icon: Icon(Icons.ac_unit),
-                text: 'Water',
+                icon: Icon(FontAwesomeIcons.handHoldingWater, size: 22.0,),
+                // text: 'آب',
+                child: Text('آب', style: myTextStyle(fontSize: 14.0),),
               ),
               Tab(
-                icon: FaIcon(FontAwesomeIcons.lightbulb),
-                text: 'Electricity',
+                // iconMargin: EdgeInsets.only(bottom: 8.0),
+                icon: FaIcon(FontAwesomeIcons.bolt, size: 22.0,),
+                // text: 'برق',
+                child: Text('برق', style: myTextStyle(fontSize: 14.0),),
               ),
               
             ],

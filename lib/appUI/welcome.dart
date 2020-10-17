@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
 
 class Welcome extends StatelessWidget {
@@ -153,7 +154,12 @@ class Welcome extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0)
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          if(prefs.getBool('toLogin') == null){
+                            prefs.setBool('toLogin', true);
+                            print(prefs.getBool('toLogin'));
+                          }
                           Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
                         }, 
                       ),
@@ -166,7 +172,11 @@ class Welcome extends StatelessWidget {
                       height: 40,
                       width: 200,
                       child: OutlineButton (
-                        onPressed: () {
+                        onPressed: () async{
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          if(prefs.getBool('toLogin') == null){
+                            prefs.setBool('toLogin', true);
+                          }
                           Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
                         }, 
                         child: Text('راجستر', style: TextStyle(color: Color(0xffFF5722), fontSize: 16.0),),

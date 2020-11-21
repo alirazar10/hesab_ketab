@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hesab_ketab/appUI/add_electricity_bill.dart';
 import 'package:hesab_ketab/appUI/add_submeters.dart';
 import 'package:hesab_ketab/appUI/add_electricity_info.dart';
-import 'package:hesab_ketab/appUI/elec_bill_show.dart';
 import 'package:hesab_ketab/appUI/elec_submeters_list.dart';
 import 'package:hesab_ketab/appUI/elect_mainmeter_list.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
@@ -172,7 +171,7 @@ class _ElectricityState extends State<Electricity> {
                         icon: Icon( FontAwesomeIcons.plus, color: Color(0xFFFF5722),  ),
                         onPressed: (){
                           Navigator.push(context, MaterialPageRoute(builder: (context) => AddElectricityBill()));
-                          
+                          print('pressed');
                         },
                       ),
                     ),
@@ -189,8 +188,7 @@ class _ElectricityState extends State<Electricity> {
                         iconSize: 24,
                         icon: Icon( FontAwesomeIcons.ellipsisH, color: Color(0xff00BCD4),),
                         onPressed: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Bills()));
-                          
+                          print('pressed');
                         },
                       ),
                     ),

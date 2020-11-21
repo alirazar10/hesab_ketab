@@ -65,6 +65,10 @@ class _SubmetersListState extends State<SubmetersList> {
                   child: ListView.builder(
                     itemCount: data.length,
                     itemBuilder: (BuildContext context, int index) {
+                      if(data[index]['error'] != null && data[index]['error'] == true  ){
+                        return  showExceptionMsg(context: this._context, message: data[index]['message']);
+                      }
+
                       if(data[index]['submeters'].length != 0){
                         var submeterLen = data[index]['submeters'].length;
                         List<TableRow> _tableRow = [];
@@ -138,7 +142,7 @@ class _SubmetersListState extends State<SubmetersList> {
                                             style: myTextStyle(fontSize: 16, fontWeight: FontWeight.w700 ),
                                           ),
                                           Text(
-                                            '${data[index]['consumer_name']} - ${data[index]['meter_no']}',
+                                            '${data[index]['consumer_name']} - ${data[index]['no_of_submeters']}',
                                             style: myTextStyle(fontSize: 16, fontWeight: FontWeight.w500 ),
                                           ),
                                         ],
@@ -275,7 +279,7 @@ deleteSubmeter(int meterID) async{
             children: [
               Icon(FontAwesomeIcons.exclamationTriangle, size: 70, color: Colors.amberAccent,),
               SizedBox(height: 20.0,),
-              Text('میتر عمومی خذف شود؟', style: myTextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold,)),
+              Text('میتر فرعی خذف شود؟', style: myTextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold,)),
               SizedBox(height: 40.0,),
 
               Row(

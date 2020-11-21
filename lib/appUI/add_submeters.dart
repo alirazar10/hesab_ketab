@@ -29,45 +29,39 @@ class _AddSubmetersState extends State<AddSubmeters> {
 
 
 
-  // fetchMainMeters() async {
-  //   final _apiConfig  = new API_Config();
-  //   final _apiURL =  _apiConfig.apiUrl('fetchMainMeters');
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  fetchMainMeters() async {
+    final _apiConfig  = new API_Config();
+    final _apiURL =  _apiConfig.apiUrl('fetchMainMeters');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     
-  //   final Map _userData =jsonDecode(prefs.getString('user')); 
-  //   final String _access_token = prefs.getString('access_token');
-  //   final Map<String, String> _headers = {                    
-  //                     "Accept": 'application/json',
-  //                     'Authorization': _access_token,
-  //                     };
-  //   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
+    final Map _userData =jsonDecode(prefs.getString('user')); 
+    final String _access_token = prefs.getString('access_token');
+    final Map<String, String> _headers = {                    
+                      "Accept": 'application/json',
+                      'Authorization': _access_token,
+                      };
+    final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
     
-  //   final response = await http.post(_apiURL, body: (data), headers: _headers);
-  //   if (response.statusCode == 200) {
-  //     // If the server did return a 200 OK response,
-  //     // then parse the JSON.
-  //     var data  = json.decode(response.body);
-  //     setState(() {
-  //       _dropdownItmes = data;
-  //     });
-  //     return data;
-  //   } else {
-  //     // If the server did not return a 200 OK response,
-  //     // then throw an exception.
-  //     throw Exception('Failed to load album');
-  //   }
-  // }
+    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      var data  = json.decode(response.body);
+      setState(() {
+        _dropdownItmes = data;
+      });
+      return data;
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load album');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchMainMeters().then((val){
-      print(val);
-        setState(() {
-          this._dropdownItmes = val;
-        });
-      }
-    );
+    fetchMainMeters();
   }
   @override
   Widget build(BuildContext context) {
@@ -95,12 +89,7 @@ class _AddSubmetersState extends State<AddSubmeters> {
           onTap: ()=>FocusScope.of(context).unfocus(),
           child: SingleChildScrollView(
             child: Column(
-              children: _dropdownItmes.isEmpty ? [ //checks if it has data if yes display loading
-                Center(child: CircularProgressIndicator())
-                ] : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? [ //check if it hass error if yes show error
-                  showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message']),
-                  
-                ]: [
+              children: [
                 Form(
                   key: _submetersFormKey,
                   child: Column(
@@ -211,4 +200,7 @@ class _AddSubmetersState extends State<AddSubmeters> {
       ),
     );
   }
+}
+
+mixin _addMainMeterFormKey {
 }

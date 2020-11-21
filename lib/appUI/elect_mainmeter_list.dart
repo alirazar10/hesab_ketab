@@ -63,10 +63,6 @@ class _MainMeterListState extends State<MainMeterList> {
             return snapshot.data.length != 0 ? ListView.builder(
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int index) {
-              var data = snapshot.data;
-              if(data[index]['error'] != null && data[index]['error'] == true  ){
-                return  showExceptionMsg(context: this._context, message: data[index]['message']);
-              }
               var status = snapshot.data[index]['status'];
               return Material(
                 // elevation: 10.0,

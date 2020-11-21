@@ -54,7 +54,7 @@ class _MyTextFieldDatePicker extends State<MyTextFieldDatePicker> {
     if (widget.dateFormat != null) {
       _dateFormat = widget.dateFormat;
     } else {
-      _dateFormat = DateFormat('y-M-d');
+      _dateFormat = DateFormat('y-d-M');
     }
       
     _selectedDate = widget.userDate != null ? widget.userDate : widget.initialDate;
@@ -65,18 +65,13 @@ class _MyTextFieldDatePicker extends State<MyTextFieldDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return TextField(
       
       focusNode: widget.focusNode,
       controller: _controllerDate,
       decoration : myInputDecoration(),
       onTap: () => _selectDate(context),
       readOnly: true,
-      validator: (value){
-        if(value.isEmpty){
-          return 'تاریخ را انتخاب نمایید.';
-        }
-      },
     );
   }
 
@@ -119,15 +114,15 @@ class _MyTextFieldDatePicker extends State<MyTextFieldDatePicker> {
     //   borderRadius: BorderRadius.circular(8.0)
     // ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Color(0xff00BCD4), width: 1.0),
+      borderSide: BorderSide(color: Color(0xff00BCD4), width: 2.0),
       borderRadius: BorderRadius.circular(8.0)
     ),
     focusedErrorBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red[700], width: 1.0),
+      borderSide: BorderSide(color: Colors.red[700], width: 2.0),
       borderRadius: BorderRadius.circular(8.0)
     ),
     errorBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red[700], width: 1.0),
+      borderSide: BorderSide(color: Colors.red[700], width: 2.0),
       borderRadius: BorderRadius.circular(8.0)
     ),
     labelStyle: myTextStyle(color: Color(0x77FF5622), fontWeight: FontWeight.w600),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hesab_ketab/appUI/email_confirmation.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,38 +23,47 @@ class _LoginState extends State<Login> {
   RegExp  _validEmail = RegExp(p);
   void login() async {
     var apiConfig = new API_Config();
-    var response = await http.post(
-      apiConfig.apiUrl('login'),
-      body: {
-        "username": this._username,
-        "password": this._password,
-      },
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": 'application/json',
-      },
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      // prefs.remove('users');
-      prefs.setString('user', json.encode(data['user']));
-      prefs.setString('access_token', data['access_token']);
-      Navigator.pushAndRemoveUntil(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => HesabKetab(userData: data)
-        ),
-        (Route<dynamic> route) => false
+    try{
+      var response = await http.post(
+        apiConfig.apiUrl('login'),
+        body: {
+          "username": this._username,
+          "password": this._password,
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": 'application/json',
+        },
       );
-    }else{
-      Map data = json.decode(response.body);
+      print(response.body);
+      if(response.statusCode == 201){
+        Map data = json.decode(response.body);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        // prefs.remove('users');
+        // prefs.remove('access_token');
+        prefs.setString('user', json.encode(data['user']));
+        prefs.setString('access_token', data['access_token']);
+        Navigator.pushAndRemoveUntil(
+          context, 
+          MaterialPageRoute(
+            builder: (context) => HesabKetab(userData: data)
+          ),
+          (Route<dynamic> route) => false
+        );
       
-      // set up the AlertDialog
-      // Alert(context: context, title: "Error", desc: data['message']).show();
-      
-      return createSnackBar(data['message']);
-      
+      }else if(response.statusCode == 401){
+        Map data = json.decode(response.body);
+        throw ('${data['message']} \n Status Code ${response.statusCode}');
+      }else if(response.statusCode == 403){ // email verification exception in middleware api
+        Map data = json.decode(response.body);
+        throw ('${data['message']} \n Status Code ${response.statusCode}');
+      }else if(response.statusCode == 500){
+        throw ('Internal server error \n Status Code ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      }
+    } catch (e){
+      return createSnackBar('$e');
     }
   }
 
@@ -124,6 +134,7 @@ class _LoginState extends State<Login> {
 
                       TextFormField(
                         textDirection: TextDirection.ltr,
+                        textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
                           labelText: 'ایمیل: ',
                           prefixIcon: Icon(Icons.email, color: Color(0xFF212121)),
@@ -147,6 +158,7 @@ class _LoginState extends State<Login> {
                       TextFormField(
                         textDirection: TextDirection.ltr,
                         obscureText: true,
+                        textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           labelText: 'پسورد: ',
                           prefixIcon: Icon(Icons.lock, color: Color(0xFF212121)),
@@ -248,44 +260,61 @@ class _RegisterState extends State<Register> {
   String _email;
   String _password;
   String _confirm_password;
+  var waitForResponse = false;
 
   
 
   void registration() async {
     var apiConfig = new API_Config();
-    var response = await http.post(
-      apiConfig.apiUrl('resgister'),
-      body: {
-        "username": this._email,
-        "password": this._password,
-        "password_confirmation":this._confirm_password
-      },
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": 'application/json',
-      }
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('user', json.encode(data['user']));
-      prefs.setString('access_token', data['access_token']);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // print('${prefs.getString('user')}  === ${prefs.getString('access_token')}');
+    // prefs.remove('user');
+    // prefs.remove('access_token');
 
-      Navigator.pushAndRemoveUntil(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => HesabKetab(userData: data)
-        ),
-        (Route<dynamic> route) => false
-        // ModalRoute.withName("/HesabKetab") 
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => EmailConfirmation()));
+    // return null;
+    try{
+      var response = await http.post(
+        apiConfig.apiUrl('resgister'),
+        body: {
+          "username": this._email,
+          "password": this._password,
+          "password_confirmation":this._confirm_password
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": 'application/json',
+        }
       );
-    }else{
-      Map data = json.decode(response.body);
-      // set up the AlertDialog
-      // Alert(context: context, title: "Error", desc:  data['errors']['username'][0]).show();
-      return createSnackBar(data['message']);
-      
-        
+      print(response.body);
+      if(response.statusCode == 201){
+        Map data = json.decode(response.body);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('user', json.encode(data['user']));
+        prefs.setString('access_token', data['access_token']);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => EmailConfirmation()));
+        setState(() {
+          waitForResponse = false;
+        });
+        // Navigator.pushAndRemoveUntil(
+        //   context, 
+        //   MaterialPageRoute(
+        //     builder: (context) => HesabKetab(userData: data)
+        //   ),
+        //   (Route<dynamic> route) => false
+        //   // ModalRoute.withName("/HesabKetab") 
+        // );
+      }else if(response.statusCode == 400){
+        Map data = json.decode(response.body);
+        throw ('${data['message']} ${response.statusCode}');
+      }else if(response.statusCode == 500){
+        throw ('Internal server error \n Status Code ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      }
+    } catch (e){
+      print(e);
+      return createSnackBar('$e');
     }
   }
 
@@ -298,7 +327,6 @@ class _RegisterState extends State<Register> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final _veiwInset = MediaQuery.of(context).viewInsets.bottom;
-    
     return Scaffold(
       key: _registerScaffoldGlobalKye,
       resizeToAvoidBottomInset: false,
@@ -329,26 +357,35 @@ class _RegisterState extends State<Register> {
                         left: MediaQuery.of(context).size.width * 0.08,
                         top: MediaQuery.of(context).size.width * 0.08,
                         right: MediaQuery.of(context).size.width * 0.08,
-                        bottom:  MediaQuery.of(context).size.width * 0.08),
-                  margin: EdgeInsets.only(bottom:MediaQuery.of(context).viewInsets.bottom * 1.06 ),
+                        bottom:  MediaQuery.of(context).viewInsets.bottom + 20),
+                  // margin: EdgeInsets.only(bottom:MediaQuery.of(context).viewInsets.bottom * 1.06 ),
                   child: Column(
                     
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Text('راجستر', 
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.bold
-                          ),
+                        // padding: const EdgeInsets.all(15.0),
+                        child: Image(
+                          image: AssetImage("assets/images/logo/Hesab_ketab_Farsi_Logo.png"),
+                          height: 100.0,
                         ),
                       ),
+                      // Container(
+                      //   padding: const EdgeInsets.all(8.0),
+                      //   child: Text('راجستر', 
+                      //     style: TextStyle(
+                      //       color: Colors.black87,
+                      //       fontSize: 20.0,
+                      //       fontWeight: FontWeight.bold
+                      //     ),
+                      //   ),
+                      // ),
                       Divider(thickness: 5.0, color: Color(0xFFFF5722),),
                       SizedBox(height: 10,),
                       TextFormField(
                         keyboardType: TextInputType.emailAddress,
                         textDirection: TextDirection.ltr,
+                        textInputAction: TextInputAction.next,
+                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
                         decoration: InputDecoration(
                           labelText: "ایمیل: ",
                           // prefixIcon: Icon(Icons.lock, color: Color(0xFF212121)),
@@ -373,6 +410,8 @@ class _RegisterState extends State<Register> {
                       TextFormField(
                         textDirection: TextDirection.ltr,
                         obscureText: true,
+                        textInputAction: TextInputAction.next,
+                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
                         decoration: InputDecoration(
                           labelText: "پسورد: ",
                           // prefixIcon: Icon(Icons.lock, color: Color(0xFF212121)),
@@ -398,6 +437,8 @@ class _RegisterState extends State<Register> {
                       TextFormField(
                         textDirection: TextDirection.ltr,
                         obscureText: true,
+                        textInputAction: TextInputAction.done,
+                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
                         decoration: InputDecoration(
                           labelText: "تکرار پسورد: ",
                           // prefixIcon: Icon(Icons.lock, color: Color(0xFF212121)),
@@ -438,14 +479,26 @@ class _RegisterState extends State<Register> {
                             child: RaisedButton(
                               padding: EdgeInsets.all(10),
                               color: Color(0xFFFF5722),
-                              child: Text(' راجستر ', 
-                                style: myTextStyle( color: Colors.white, fontSize: 15.0),
+                              child: Row(
+                                children: [
+                                  Text(' راجستر ', 
+                                    style: myTextStyle( color: Colors.white, fontSize: 15.0),
+                                  ),
+                                  SizedBox(width: 8.0,),
+                                  waitForResponse ? Container(
+                                    height: 20.0,width: 20.0, 
+                                    child: (CircularProgressIndicator(strokeWidth: 3.0, backgroundColor: Colors.white,))
+                                  ) : Container()
+                                ],
                               ),
-                              onPressed: (){
+                              onPressed: () async{
                                 if(_regFromKey.currentState.validate()){
                                   _regFromKey.currentState.save();
-                                  registration();
-
+                                  setState(() {
+                                    waitForResponse = true;
+                                  });
+                                  // ignore: await_only_futures
+                                  await registration();
                                 }
                               }
                             ),

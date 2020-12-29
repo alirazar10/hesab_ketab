@@ -63,6 +63,10 @@ class _MainMeterListState extends State<MainMeterList> {
             return snapshot.data.length != 0 ? ListView.builder(
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int index) {
+              var data = snapshot.data;
+              if(data[index]['error'] != null && data[index]['error'] == true  ){
+                return  showExceptionMsg(context: this._context, message: data[index]['message']);
+              }
               var status = snapshot.data[index]['status'];
               return Material(
                 // elevation: 10.0,
@@ -278,6 +282,32 @@ class _MainMeterListState extends State<MainMeterList> {
       return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey);
 
     }
+    try {
+      var response = await http.post(
+        this._apiUrl,
+        body: _mainMeterData, 
+        headers: _header,
+      );
+
+      if(response.statusCode == 201){
+        Map data = json.decode(response.body);
+        return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey, color: Colors.cyan);
+      }else if(response.statusCode == 400) {
+        Map data  = json.decode(response.body);
+        throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      }else if (response.statusCode == 422){
+        Map data = json.decode(response.body);
+        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      }else if(response.statusCode == 500){
+
+        Map data = json.decode(response.body);
+        throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      }
+    } catch (e) {
+      return createSnackBar('$e', _context, _mainMeterListScaffoldStateKey, color: Colors.red);
+    }
   }
   myEditAlertBox({BuildContext context, String consumerName, String subscNo, String meterNo, int noOfMeter, int meterID, String date} ){
     
@@ -394,8 +424,8 @@ class _MainMeterListState extends State<MainMeterList> {
                           onPressed: () {
                             if(_editMainMeterFormKey.currentState.validate()){
                               _editMainMeterFormKey.currentState.save();
+                              editMainMeter(meterID);
                               setState(() {
-                                editMainMeter(meterID);
                                 futureMainmeter = fetchMainMeters();
                                 Navigator.of(context, rootNavigator: true).pop();
                               });
@@ -426,19 +456,31 @@ class _MainMeterListState extends State<MainMeterList> {
                   "Accept": 'application/json',
                   'Authorization': _access_token,};
     // print(_mainMeterData);
-    var response = await http.post(
-      this._apiUrl,
-      body: _mainMeterData, 
-      headers: _header,
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      
-      return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey);
-    }else{
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey);
+    try{
+      var response = await http.post(
+        this._apiUrl,
+        body: _mainMeterData, 
+        headers: _header,
+      );
+      if(response.statusCode == 201){
+        Map data = json.decode(response.body);
+        return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey, color: Colors.cyan);
+      }else if (response.statusCode == 422){
+        Map data = json.decode(response.body);
+        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      }else if(response.statusCode == 400){
 
+        Map data = json.decode(response.body);
+        throw('Message: ${data['message']}');
+      }else if(response.statusCode == 500){
+
+        Map data = json.decode(response.body);
+        throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      }
+    }catch(e){
+      return createSnackBar('$e', _context, _mainMeterListScaffoldStateKey, color: Colors.red);
     }
   }
 
@@ -465,8 +507,8 @@ class _MainMeterListState extends State<MainMeterList> {
                     color: Colors.red,
                     child: Text('حذف', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
                     onPressed: (){
+                      deleteMainMeter(meterID);
                       setState(() {
-                        deleteMainMeter(meterID);
                         futureMainmeter = fetchMainMeters();
                         Navigator.of(context, rootNavigator: true).pop();
                       });

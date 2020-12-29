@@ -7,12 +7,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  var email = prefs.getString('user');
-  // prefs.remove('user');
-  // prefs.remove('toLogin');
-  var firstTimeSeen = prefs.getBool('toLogin');
-  // print(firstTimeSeen);
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // var email = prefs.getString('user');
+  // // prefs.remove('user');
+  // // prefs.remove('toLogin');
+  // var firstTimeSeen = prefs.getBool('toLogin');
+  // // print(firstTimeSeen);
 
   
   runApp(
@@ -50,7 +50,65 @@ Future<void> main() async {
       ),
       title: 'الکتروخانه',
       // onGenerateRoute: ,
-      home: email == null ? (firstTimeSeen == null ? Welcome() : Login()) : HesabKetab() ,
+      // home: email == null ? (firstTimeSeen == null ? Welcome() : Login()) : HesabKetab() ,
+      home: SalashScreen(),
     ),
   );
+}
+
+
+class SalashScreen extends StatefulWidget {
+  SalashScreen({Key key}) : super(key: key);
+
+  @override
+  _SalashScreenState createState() => _SalashScreenState();
+}
+
+class _SalashScreenState extends State<SalashScreen> {
+
+  var email;
+  var firstTimeSeen;
+  
+  duration() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var email = prefs.getString('user');
+    // prefs.remove('user');
+    // prefs.remove('toLogin');
+    var firstTimeSeen = prefs.getBool('toLogin');
+    Future.delayed(Duration(seconds: 3),(){
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => email == null ? (firstTimeSeen == null ? Welcome() : Login()) : HesabKetab(),
+        ),
+        (Route<dynamic> route) => false
+      );
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    duration();
+  }
+
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            alignment: Alignment.center,
+            color: Colors.white,
+            child: Image.asset('assets/images/logo/logo_no_txt.png',width: 300,height: 300),
+          ),
+          CircularProgressIndicator(),
+          Text(' '),
+        ],
+      )
+    );
+  }
 }

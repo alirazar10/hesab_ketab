@@ -51,18 +51,30 @@ class _AddMainMeterState extends State<AddMainMeter> {
                   "Accept": 'application/json',
                   'Authorization': _access_token,};
     // print(_mainMeterData);
-    var response = await http.post(
-      this._apiUrl,
-      body: _mainMeterData, 
-      headers: _header,
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], _context, _addMainMeterScaffoldStateKey);
-    }else{
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], _context, _addMainMeterScaffoldStateKey);
-
+    
+    
+    try{
+      var response = await http.post(
+        this._apiUrl,
+        body: _mainMeterData, 
+        headers: _header,
+      );
+      if(response.statusCode == 201){
+        Map data = json.decode(response.body);
+        return createSnackBar(data['message'], _context, _addMainMeterScaffoldStateKey);
+      }else if (response.statusCode == 422){
+        Map data = json.decode(response.body);
+        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      }else if(response.statusCode == 400) {
+        Map data  = json.decode(response.body);
+        throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      }else if(response.statusCode == 500){
+        throw ('Internal server error \n Status Code ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      }
+    }catch (e){
+      return createSnackBar('$e', context, _addMainMeterScaffoldStateKey, color: Colors.red);
     }
   }
   @override

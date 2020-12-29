@@ -65,6 +65,10 @@ class _SubmetersListState extends State<SubmetersList> {
                   child: ListView.builder(
                     itemCount: data.length,
                     itemBuilder: (BuildContext context, int index) {
+                      if(data[index]['error'] != null && data[index]['error'] == true  ){
+                        return  showExceptionMsg(context: this._context, message: data[index]['message']);
+                      }
+
                       if(data[index]['submeters'].length != 0){
                         var submeterLen = data[index]['submeters'].length;
                         List<TableRow> _tableRow = [];
@@ -138,7 +142,7 @@ class _SubmetersListState extends State<SubmetersList> {
                                             style: myTextStyle(fontSize: 16, fontWeight: FontWeight.w700 ),
                                           ),
                                           Text(
-                                            '${data[index]['consumer_name']} - ${data[index]['meter_no']}',
+                                            '${data[index]['consumer_name']} - ${data[index]['no_of_submeters']}',
                                             style: myTextStyle(fontSize: 16, fontWeight: FontWeight.w500 ),
                                           ),
                                         ],
@@ -245,21 +249,37 @@ deleteSubmeter(int meterID) async{
                   "Accept": 'application/json',
                   'Authorization': this._access_token,};
     // print(_mainMeterData);
-    var response = await http.post(
-      this._apiUrl,
-      body: _submeterData, 
-      headers: _header,
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      
-      return createSnackBar(data['message'], _context, _submeterListScaffoldStateKey);
-    }else{
-      print(response.body);
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], _context, _submeterListScaffoldStateKey);
+    
+    
 
+    try{
+      var response = await http.post(
+        this._apiUrl,
+        body: _submeterData, 
+        headers: _header,
+      );
+      if(response.statusCode == 201){
+        Map data = json.decode(response.body);
+        return createSnackBar(data['message'], _context, _submeterListScaffoldStateKey, color: Colors.cyan);
+      }else if (response.statusCode == 422){
+        Map data = json.decode(response.body);
+        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      }else if(response.statusCode == 400){
+
+        Map data = json.decode(response.body);
+        throw('Message: ${data['message']}');
+      }else if(response.statusCode == 500){
+
+        Map data = json.decode(response.body);
+        throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      }
+    }catch(e){
+      return createSnackBar('$e', _context, _submeterListScaffoldStateKey, color: Colors.red);
     }
+    
+
   }
 
   myDelete({BuildContext context, meterID}){
@@ -275,7 +295,7 @@ deleteSubmeter(int meterID) async{
             children: [
               Icon(FontAwesomeIcons.exclamationTriangle, size: 70, color: Colors.amberAccent,),
               SizedBox(height: 20.0,),
-              Text('میتر عمومی خذف شود؟', style: myTextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold,)),
+              Text('میتر فرعی خذف شود؟', style: myTextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold,)),
               SizedBox(height: 40.0,),
 
               Row(

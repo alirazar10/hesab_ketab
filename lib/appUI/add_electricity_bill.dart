@@ -21,10 +21,11 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
   final GlobalKey<ScaffoldState> _billScaffoldStateKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _addBillFromKey = GlobalKey<FormState>();
   TextEditingController _payableBillController = TextEditingController();
+  TextEditingController _readingTurnBillController = TextEditingController();
   List _dropdownItmes = List();
   String _dropdownValue;
   DateTime _mySelectedDateIssue;
-  DateTime _mySelectedDateEnd;
+  DateTime _mySelectedDateEnd = DateTime.now();
   int _submeterNo;
   List _submeterInfo = List();
   List<Widget> _children = [];
@@ -46,32 +47,39 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
                       'Authorization': _access_token,
                       };
     final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
-    
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      // print(data);
-      List res = new List();
-
-      
-      for( var i = 0; i < data.length; i++){
-        if(data[i]['status'] == 1){
-          if(data[i]['submeters'].length != 0){
-            res.add(data[i]);
+    try {
+      final response = await http.post(_apiURL, body: (data), headers: _headers);
+      if (response.statusCode == 200) {
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        List data  = json.decode(response.body);
+        // print(data);
+        List res = new List();
+        for( var i = 0; i < data.length; i++){
+          if(data[i]['status'] == 1){
+            if(data[i]['submeters'].length != 0){
+              res.add(data[i]);
+            }
           }
         }
+        setState(() {
+          _dropdownItmes = res;
+        });
+        return res;
+      }else if(response.statusCode == 401){
+        Map data  = json.decode(response.body);
+        throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
+      } else if(response.statusCode == 500){
+        
+        throw ('Internal server error \n Status Code ${response.statusCode}');
       }
+    } catch (e) {
+      List data = List();
+      data.add({'error': true, 'message': '${e.toString()}'});
       setState(() {
-        _dropdownItmes = res;
+        _dropdownItmes = data;
       });
-      return res;
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      print(response.body);
-      throw Exception('Failed to load album');
+      return data; 
     }
   }
   _addSubmeterTextFeild(submeterNO, submeterInfo){
@@ -136,7 +144,11 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
               child: SingleChildScrollView(
                 // controller: controller,
                 child: Column(
-                  children: [
+                  children: _dropdownItmes.isEmpty ? [ //checks if it has data if yes display loading
+                Center(child: CircularProgressIndicator())
+                ] : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? [ //check if it hass error if yes show error
+                  showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message']),
+                ]:  [
                     Container(
                       child: DropdownButtonFormField(
                           
@@ -190,7 +202,26 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
                         },
                       )
                     ),
-                    
+                    SizedBox(height: height * 0.015,),
+                    Container(
+                      
+                      child: TextFormField(
+                        controller: _readingTurnBillController,
+                        decoration: myInputDecoration(labelText: 'دوره و سال', 
+                          // helperText: '1393/3'
+                        ),
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.next,
+                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                        style: myTextStyle(color: Color(0xFF212121)),
+                        // ignore: missing_return
+                        validator: (value){
+                          if (value.isEmpty) {
+                            return 'مقدار پول پرداختی را وارد نمایید.';
+                          }
+                        },
+                      )
+                    ),
                     SizedBox(height: height * 0.012,),
                     MyTextFieldDatePicker(
                       
@@ -231,16 +262,17 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
                         padding: EdgeInsets.all(10.0),
                         color: Color(0xFFFF5722),
                         child: Text('ثبت و محاسبه بل' , style: myTextStyle(color: Colors.white),),
-                        onPressed: () {
+                        onPressed: () async{
                           if(_addBillFromKey.currentState.validate()){
                             _addBillFromKey.currentState.save();
-                            var dataToBeSend = {
+                            var dataToSend = {
                               'mainmeter_id' : _dropdownValue,
                               'bill_amount' : _payableBillController.text,
+                              'meter_reading_turn': _readingTurnBillController.text,
                               'issue_date' : _mySelectedDateIssue.toString(),
                               'due_date' : _mySelectedDateEnd.toString()
                             };
-                            addBill(context, _billScaffoldStateKey, _degreeTextFeildController, dataToBeSend);
+                            await addBill(context, _billScaffoldStateKey, _degreeTextFeildController, dataToSend);
                           }
                         },
                       )

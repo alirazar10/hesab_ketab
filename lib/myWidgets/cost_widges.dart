@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:hesab_ketab/utils/navigationService.dart';
 myTextStyle({Color color, fontSize, FontWeight fontWeight}){
     return TextStyle(
       color: color, 
@@ -101,4 +101,44 @@ Widget showExceptionMsg({BuildContext context, message}){
       ],
     ),
   );
+}
+
+class UnauthenticatedUser extends StatefulWidget {
+  UnauthenticatedUser({Key key}) : super(key: key);
+
+  @override
+  _UnauthenticatedUserState createState() => _UnauthenticatedUserState();
+}
+
+class _UnauthenticatedUserState extends State<UnauthenticatedUser> {
+  final GlobalKey<ScaffoldState> unAuthUserScaffold = GlobalKey<ScaffoldState>();
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.warning,size: 80.0, color: Colors.yellow[600],),
+            SizedBox(height: 30.0,),
+            Text(' اعتبار شما منقضی شده ست!', 
+            textAlign: TextAlign.center,
+            style: myTextStyle(color: Colors.redAccent, fontSize: 24.0),
+            ),
+            Text('Authentication Expired!',
+            textDirection: TextDirection.ltr,
+            textAlign: TextAlign.center,
+            style: myTextStyle(color: Colors.redAccent, fontSize: 24.0),
+            ),
+            SizedBox(height: 30.0,),
+            RaisedButton(onPressed: (){
+              NavigationService.instance.navigateToRemoveUntil('login');
+            },color: Colors.cyan ,child: Text('ورود مجدد', 
+            style: myTextStyle(color: Colors.white, fontSize: 24.0),)),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'appUI/welcome.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-
+import 'utils/routes.dart';
+import 'utils/navigationService.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -15,7 +16,6 @@ Future<void> main() async {
   // var firstTimeSeen = prefs.getBool('toLogin');
   // // print(firstTimeSeen);
 
-  
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -50,22 +50,24 @@ Future<void> main() async {
         ),
       ),
       title: 'الکتروخانه',
+      navigatorKey: NavigationService.instance.navigationKey,
       // onGenerateRoute: ,
       // home: email == null ? (firstTimeSeen == null ? Welcome() : Login()) : HesabKetab() ,
-      home: SalashScreen(),
+      initialRoute: '/',
+      onGenerateRoute: GenerateRoute.generateRoute,
     ),
   );
 }
 
 
-class SalashScreen extends StatefulWidget {
-  SalashScreen({Key key}) : super(key: key);
+class SplashScreen extends StatefulWidget {
+  SplashScreen({Key key}) : super(key: key);
 
   @override
-  _SalashScreenState createState() => _SalashScreenState();
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SalashScreenState extends State<SalashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
 
   var email;
   var firstTimeSeen;

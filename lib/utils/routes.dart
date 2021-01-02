@@ -1,17 +1,19 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
+import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import '../appUI/welcome.dart';
 import '../appUI/login.dart';
-class GenerateRout {
-  Route<dynamic> generateRoute(RouteSettings settings){
+import 'package:hesab_ketab/main.dart';
+class GenerateRoute {
+  static Route<dynamic> generateRoute(RouteSettings settings){
     final arg = settings.arguments;
 
-    switch (arg){
+    switch (settings.name){
       case '/':
-        return MaterialPageRoute(builder: (context)=> Welcome());
-      case 'login':
+        return MaterialPageRoute(builder: (context)=> SplashScreen());
+      case '/login':
         return MaterialPageRoute(builder: (context)=> Login());
+      case '/unAuthUser':
+        return MaterialPageRoute(builder: (context)=> UnauthenticatedUser());
       default:
         return MaterialPageRoute(builder: (context)=> Login());
 

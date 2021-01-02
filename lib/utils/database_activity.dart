@@ -6,6 +6,7 @@ import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'package:hesab_ketab/utils/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'navigationService.dart';
 
 logout(context, scaffoldKey) async {
   final _apiConfig  = new API_Config();
@@ -36,13 +37,14 @@ logout(context, scaffoldKey) async {
         (Route<dynamic> route) => false
         // ModalRoute.withName("/HesabKetab") 
       );
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       throw ('Internal server error \n ${response.body} \n Status Code ${response.statusCode}');
     }else{
       throw('Message: Unkown Error Status ${response.body} Code:  ${response.statusCode}');
     }
   } catch (e){
-
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
@@ -66,6 +68,8 @@ fetchMainMeters() async {
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
@@ -103,6 +107,8 @@ changeMainMeterStatus( context, scaffoldKey,  meterID, status) async {
     } else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
       throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
@@ -145,6 +151,8 @@ addSubMeters(BuildContext context, scaffoldKey, {meterID, submeterConsumer,meter
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
       throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
@@ -174,6 +182,8 @@ fetchSubmeter() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
@@ -224,6 +234,8 @@ addBill(BuildContext context, scaffoldKey, _degreeTextFeildController ,  Map dat
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
       throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       Map data = json.decode(response.body);
       throw('Message: Server Internal Error With Status Code:  ${response.statusCode}');
@@ -259,6 +271,9 @@ fetchBills() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
+      // handleUnauthorizedUser(response, context: null, scaffoldKey: null);
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
@@ -271,6 +286,7 @@ fetchBills() async{
   } catch (e) {
     List data = List();
     data.add({'error': true, 'message': '${e.toString()}'});
+    print(e);
     return data; 
   }
   
@@ -302,6 +318,8 @@ addWaterMeter(BuildContext context, scaffoldKey ,  Map dataToBeSend) async{
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
       throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
       throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
@@ -339,6 +357,8 @@ fetchWaterMeter() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
@@ -379,6 +399,8 @@ editWaterMeter(context, scaffoldKey, Map<String, dynamic> dataToSend ) async{
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
       throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
       throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
@@ -413,6 +435,8 @@ deleteWaterMeter( context, scaffoldKey, meterID)async{
     if(response.statusCode == 201){
       Map data = json.decode(response.body);
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
       throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
@@ -458,6 +482,8 @@ changeWaterMeterStatus(context, scaffoldKey, meterID, status)async{
 
       Map data = json.decode(response.body);
       throw('Message: ${data['message']}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       Map data = json.decode(response.body);
       throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
@@ -493,6 +519,8 @@ addWaterNeighbor(context, scaffoldKey, Map dataToSend ) async {
 
       Map data = json.decode(response.body);
       throw('Message: ${data['message']}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
       throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
@@ -528,6 +556,8 @@ fetchWaterNeighbor() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
@@ -571,6 +601,8 @@ deleteWaterNeighbor(context, scaffoldKey, neighborID)async{
 
       Map data = json.decode(response.body);
       throw('Message: ${data['message']}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       Map data = json.decode(response.body);
       throw('Message: Internal Server Error \n With Status Code:  ${response.statusCode}');
@@ -617,6 +649,8 @@ addWaterBill(context, scaffoldKey, peopleTextFieldData, dataToSend) async{
 
       Map data = json.decode(response.body);
       throw('Message: ${data['message']}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
@@ -653,7 +687,9 @@ fetchWaterBill()async{
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
-    } else if(response.statusCode == 500){
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
+    }else if(response.statusCode == 500){
       
       throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
@@ -696,6 +732,8 @@ confirm(context, scaffoldKey, confirmationCode) async {
 
       Map data = json.decode(response.body);
       throw('Message: ${data['message']}');
+    }else if(response.statusCode == 401){
+      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);

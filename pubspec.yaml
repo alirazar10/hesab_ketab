@@ -75,6 +75,8 @@ flutter:
     - assets/images/icons/electricity.png
     - assets/images/icons/water.png
     - assets/images/designs/design2.png
+    - assets/images/logo/imor_black.png
+    - assets/images/logo/imor_white.png
     # - assets/images/designs/design1.png
     # - images/a_dot_ham.jpeg
 

@@ -76,7 +76,9 @@ class _AddWaterBillState extends State<AddWaterBill> {
             key: _addWaterBillFormKey,
             child: Column(
               children: _dropdownItmes.isEmpty ? [ //checks if it has data if yes display loading
-                Center(child: CircularProgressIndicator())
+                Container(
+                  alignment: Alignment.center, height: this.height - 100 ,
+                  child: CircularProgressIndicator())
                 ] : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? [ //check if it hass error if yes show error
                   showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message']),
                   

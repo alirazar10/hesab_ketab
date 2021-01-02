@@ -28,15 +28,7 @@ logout(context, scaffoldKey) async {
     if(response.statusCode == 201){
       prefs.remove('user');
       prefs.remove('access_token');
-      // Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
-      Navigator.pushAndRemoveUntil(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => Login()
-        ),
-        (Route<dynamic> route) => false
-        // ModalRoute.withName("/HesabKetab") 
-      );
+      NavigationService.instance.navigateToRemoveUntil('/login');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){

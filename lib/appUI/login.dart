@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hesab_ketab/appUI/email_confirmation.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
+import 'package:hesab_ketab/utils/navigationService.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/api_config.dart';
@@ -42,20 +43,18 @@ class _LoginState extends State<Login> {
         // prefs.remove('access_token');
         prefs.setString('user', json.encode(data['user']));
         prefs.setString('access_token', data['access_token']);
-        Navigator.pushAndRemoveUntil(
-          context, 
-          MaterialPageRoute(
-            builder: (context) => HesabKetab(userData: data)
-          ),
-          (Route<dynamic> route) => false
-        );
+        NavigationService.instance.navigateToRemoveUntil('/hesabKetab', arguments: data);
       
       }else if(response.statusCode == 401){
         Map data = json.decode(response.body);
         throw ('${data['message']} \n Status Code ${response.statusCode}');
       }else if(response.statusCode == 403){ // email verification exception in middleware api
         Map data = json.decode(response.body);
-        throw ('${data['message']} \n Status Code ${response.statusCode}');
+        createSnackBar('${data['message']}. Status Code ${response.statusCode}');
+        Future.delayed(Duration(seconds: 2), (){
+          NavigationService.instance.navigateTo('/confirmEmail');
+        });
+        // throw ('${data['message']} \n Status Code ${response.statusCode}');
       }else if(response.statusCode == 500){
         throw ('Internal server error \n Status Code ${response.statusCode}');
       }else{
@@ -198,7 +197,7 @@ class _LoginState extends State<Login> {
                           ),
                           InkWell(
                             onTap: () {                          
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
+                              NavigationService.instance.navigateTo('/register');
                             },
                             child: Container(
                               margin: EdgeInsets.only(top:20.0),
@@ -266,12 +265,6 @@ class _RegisterState extends State<Register> {
   void registration() async {
     var apiConfig = new API_Config();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // print('${prefs.getString('user')}  === ${prefs.getString('access_token')}');
-    // prefs.remove('user');
-    // prefs.remove('access_token');
-
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => EmailConfirmation()));
-    // return null;
     try{
       var response = await http.post(
         apiConfig.apiUrl('resgister'),
@@ -285,31 +278,22 @@ class _RegisterState extends State<Register> {
           "Accept": 'application/json',
         }
       );
-      print(response.body);
       if(response.statusCode == 201){
         Map data = json.decode(response.body);
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('user', json.encode(data['user']));
         prefs.setString('access_token', data['access_token']);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => EmailConfirmation()));
+        NavigationService.instance.navigateTo('/confirmEmail');
         setState(() {
           waitForResponse = false;
         });
-        // Navigator.pushAndRemoveUntil(
-        //   context, 
-        //   MaterialPageRoute(
-        //     builder: (context) => HesabKetab(userData: data)
-        //   ),
-        //   (Route<dynamic> route) => false
-        //   // ModalRoute.withName("/HesabKetab") 
-        // );
       }else if(response.statusCode == 400){
         Map data = json.decode(response.body);
         throw ('${data['message']} ${response.statusCode}');
       }else if(response.statusCode == 500){
         throw ('Internal server error \n Status Code ${response.statusCode}');
       }else{
-        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+        throw('Message: Unkown Error \n Status Code:  ${response.statusCode}');
       }
     } catch (e){
       print(e);
@@ -368,16 +352,6 @@ class _RegisterState extends State<Register> {
                           height: 100.0,
                         ),
                       ),
-                      // Container(
-                      //   padding: const EdgeInsets.all(8.0),
-                      //   child: Text('راجستر', 
-                      //     style: TextStyle(
-                      //       color: Colors.black87,
-                      //       fontSize: 20.0,
-                      //       fontWeight: FontWeight.bold
-                      //     ),
-                      //   ),
-                      // ),
                       Divider(thickness: 5.0, color: Color(0xFFFF5722),),
                       SizedBox(height: 10,),
                       TextFormField(
@@ -468,7 +442,6 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                       SizedBox(height: 10,),
-
                       Row(
                         mainAxisAlignment:  MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -504,7 +477,7 @@ class _RegisterState extends State<Register> {
                           ),
                           InkWell(
                             onTap: () {                          
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+                              NavigationService.instance.navigateTo('/login');
                             },
                             child: Container(
                               margin: EdgeInsets.only(top:20.0),

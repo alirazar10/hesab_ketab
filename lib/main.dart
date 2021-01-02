@@ -75,17 +75,28 @@ class _SplashScreenState extends State<SplashScreen> {
   duration() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var email = prefs.getString('user');
-    // prefs.remove('user');
-    // prefs.remove('toLogin');
+    prefs.remove('user');
+    prefs.remove('toLogin');
     var firstTimeSeen = prefs.getBool('toLogin');
     Future.delayed(Duration(seconds: 3),(){
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => email == null ? (firstTimeSeen == null ? Welcome() : Login()) : HesabKetab(),
-        ),
-        (Route<dynamic> route) => false
-      );
+
+      if(email == null){
+        if(firstTimeSeen == null)
+          NavigationService.instance.navigateToRemoveUntil('/welcome');
+        else
+          NavigationService.instance.navigateToRemoveUntil('/login');
+
+      }else{
+        NavigationService.instance.navigateToRemoveUntil('/hesabKetab');
+      }
+
+      // Navigator.pushAndRemoveUntil(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => email == null ? (firstTimeSeen == null ? Welcome() : Login()) : HesabKetab(),
+      //   ),
+      //   (Route<dynamic> route) => false
+      // );
     });
   }
   @override

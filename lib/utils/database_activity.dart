@@ -66,7 +66,7 @@ fetchMainMeters() async {
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
-    }else if(response.statusCode == 401){
+    }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
     } else if(response.statusCode == 500){
@@ -174,7 +174,7 @@ fetchSubmeter() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
-    }else if(response.statusCode == 401){
+    }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
     } else if(response.statusCode == 500){
@@ -259,7 +259,7 @@ fetchBills() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
-    }else if(response.statusCode == 401){
+    }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
     } else if(response.statusCode == 500){
@@ -339,7 +339,7 @@ fetchWaterMeter() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
-    }else if(response.statusCode == 401){
+    }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
     } else if(response.statusCode == 500){
@@ -528,7 +528,7 @@ fetchWaterNeighbor() async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
-    }else if(response.statusCode == 401){
+    }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
     } else if(response.statusCode == 500){
@@ -650,7 +650,7 @@ fetchWaterBill()async{
       // then parse the JSON.
       List data  = json.decode(response.body);
       return data;
-    }else if(response.statusCode == 401){
+    }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
       throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
     } else if(response.statusCode == 500){

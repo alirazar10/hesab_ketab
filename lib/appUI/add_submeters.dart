@@ -32,7 +32,6 @@ class _AddSubmetersState extends State<AddSubmeters> {
   void initState() {
     super.initState();
     fetchMainMeters().then((val){
-      print(val);
         setState(() {
           this._dropdownItmes = val;
         });

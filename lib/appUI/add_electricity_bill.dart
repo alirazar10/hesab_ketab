@@ -66,7 +66,7 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
           _dropdownItmes = res;
         });
         return res;
-      }else if(response.statusCode == 401){
+      }else if(response.statusCode == 404){
         Map data  = json.decode(response.body);
         throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
       } else if(response.statusCode == 500){

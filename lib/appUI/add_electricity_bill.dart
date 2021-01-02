@@ -70,8 +70,9 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
         Map data  = json.decode(response.body);
         throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
       } else if(response.statusCode == 500){
-        
         throw ('Internal server error \n Status Code ${response.statusCode}');
+      }else{
+        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
       }
     } catch (e) {
       List data = List();
@@ -145,7 +146,10 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
                 // controller: controller,
                 child: Column(
                   children: _dropdownItmes.isEmpty ? [ //checks if it has data if yes display loading
-                Center(child: CircularProgressIndicator())
+                  Container(
+                    alignment: Alignment.center,
+                    height: this.height - 100 ,
+                    child: CircularProgressIndicator())
                 ] : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? [ //check if it hass error if yes show error
                   showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message']),
                 ]:  [

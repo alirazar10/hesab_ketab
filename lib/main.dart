@@ -4,6 +4,7 @@ import 'package:hesab_ketab/appUI/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'appUI/welcome.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -95,20 +96,46 @@ class _SalashScreenState extends State<SalashScreen> {
   
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            alignment: Alignment.center,
-            color: Colors.white,
-            child: Image.asset('assets/images/logo/logo_no_txt.png',width: 300,height: 300),
-          ),
-          CircularProgressIndicator(),
-          Text(' '),
-        ],
-      )
+    return Material(
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              alignment: Alignment.center,
+              color: Colors.white,
+              child: Text(' '),
+              // child: Image.asset('assets/images/logo/logo_no_txt.png',width: 300,height: 300),
+            ),
+            // CircularProgressIndicator(),
+            SizedBox(
+              width: 250.0,
+              child: TextLiquidFill(
+                    loadDuration: Duration(seconds: 3),
+                    waveDuration: Duration(seconds: 5),
+                    text: 'حساب کتاب',
+                    waveColor: Color(0xff00BCD4),
+                    boxBackgroundColor: Colors.white,
+                    textStyle: TextStyle(
+                      fontSize: 28.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    boxHeight: 100.0,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/images/logo/imor_black.png',width: 50,height: 50),
+                SizedBox(width: 10.0,),
+                Text('Powered by'),
+              ],
+            ),
+          ],
+        )
+      ) 
     );
   }
 }

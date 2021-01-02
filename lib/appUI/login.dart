@@ -35,7 +35,6 @@ class _LoginState extends State<Login> {
           "Accept": 'application/json',
         },
       );
-      print(response.body);
       if(response.statusCode == 201){
         Map data = json.decode(response.body);
         SharedPreferences prefs = await SharedPreferences.getInstance();

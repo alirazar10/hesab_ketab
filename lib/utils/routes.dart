@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hesab_ketab/appUI/Water_bills.dart';
 import 'package:hesab_ketab/appUI/email_confirmation.dart';
 import 'package:hesab_ketab/appUI/hesab_ketab.dart';
 import 'package:hesab_ketab/appUI/login.dart';
@@ -23,7 +24,9 @@ class GenerateRoute {
       case '/register': 
         return MaterialPageRoute(builder: (context)=> Register());
       case '/confirmEmail':
-        return MaterialPageRoute(builder: (context)=> EmailConfirmation()); 
+        return MaterialPageRoute(builder: (context)=> EmailConfirmation());
+      case '/waterBills':
+        return MaterialPageRoute(builder: (context)=> WaterBills());
       default:
         return MaterialPageRoute(builder: (context)=> Login());
 

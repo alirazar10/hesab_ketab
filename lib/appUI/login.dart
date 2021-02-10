@@ -50,12 +50,14 @@ class _LoginState extends State<Login> {
         throw ('${data['message']} \n Status Code ${response.statusCode}');
       }else if(response.statusCode == 403){ // email verification exception in middleware api
         Map data = json.decode(response.body);
-        createSnackBar('${data['message']}. Status Code ${response.statusCode}');
-        Future.delayed(Duration(seconds: 2), (){
-          NavigationService.instance.navigateTo('/confirmEmail');
-        });
-        // throw ('${data['message']} \n Status Code ${response.statusCode}');
+        // createSnackBar('${data['message']}. Status Code ${response.statusCode}');
+        // Future.delayed(Duration(seconds: 2), (){
+        //   NavigationService.instance.navigateTo('/confirmEmail', arguments: {
+        //   "username": this._username, "password": this._password,});
+        // });
+        throw ('${data['message']} \n Status Code ${response.statusCode}');
       }else if(response.statusCode == 500){
+        print(response.body);
         throw ('Internal server error \n Status Code ${response.statusCode}');
       }else{
         throw('Message: Unkown Error Status Code:  ${response.statusCode}');
@@ -296,7 +298,6 @@ class _RegisterState extends State<Register> {
         throw('Message: Unkown Error \n Status Code:  ${response.statusCode}');
       }
     } catch (e){
-      print(e);
       return createSnackBar('$e');
     }
   }

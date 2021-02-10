@@ -212,24 +212,27 @@ class _BillsState extends State<Bills> {
 
                                       child: Column(
                                         children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              
-                                              Container(child: Text('درجه حالیه:  ', style: myTextStyle(),)),
-                                              Container(
-                                                child: Text('${_bills[i]['submeterdegrees'][j]['current_degree']}'),
-                                              ),
-                                              Container( 
-                                                height: 20.0,
-                                                child: VerticalDivider(color: Colors.grey, )
-                                              ),
-                                              Container(child: Text('درجه مصرف شده:  ', style: myTextStyle(),)),
-                                              Container(
-                                                child: Text('${_bills[i]['submeterdegrees'][j]['consumed_degree']}'),
-                                              ),
-                                              
-                                            ],
+                                          SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                
+                                                Container(child: Text('درجه حالیه:  ', style: myTextStyle(),)),
+                                                Container(
+                                                  child: Text('${_bills[i]['submeterdegrees'][j]['current_degree']}'),
+                                                ),
+                                                Container( 
+                                                  height: 20.0,
+                                                  child: VerticalDivider(color: Colors.grey, )
+                                                ),
+                                                Container(child: Text('درجه مصرف شده:  ', style: myTextStyle(),)),
+                                                Container(
+                                                  child: Text('${_bills[i]['submeterdegrees'][j]['consumed_degree']}'),
+                                                ),
+                                                
+                                              ],
+                                            ),
                                           ),
                                           // Divider(thickness: 1.3,),
                                           

@@ -68,9 +68,9 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
         return res;
       }else if(response.statusCode == 404){
         Map data  = json.decode(response.body);
-        throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
+        throw ('${data['message']} \n  ${response.statusCode}');
       } else if(response.statusCode == 500){
-        throw ('Internal server error \n Status Code ${response.statusCode}');
+        throw ('Internal server error \n ${response.statusCode}');
       }else{
         throw('Message: Unkown Error Status Code:  ${response.statusCode}');
       }

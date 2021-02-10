@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hesab_ketab/appUI/hesab_ketab.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'package:hesab_ketab/utils/database_activity.dart';
+import 'package:hesab_ketab/utils/navigationService.dart';
 
 class EmailConfirmation extends StatefulWidget {
   EmailConfirmation({Key key}) : super(key: key);
@@ -136,14 +137,15 @@ class _EmailConfirmationState extends State<EmailConfirmation> {
                             setState(() {
                               waitForResponse = false;
                             });
-                            Navigator.pushAndRemoveUntil(
-                              context, 
-                              MaterialPageRoute(
-                                builder: (context) => HesabKetab()
-                              ),
-                              (Route<dynamic> route) => false
-                              // ModalRoute.withName("/HesabKetab") 
-                            );
+                            NavigationService.instance.navigateToRemoveUntil('/hesabKetab');
+                            // Navigator.pushAndRemoveUntil(
+                            //   context, 
+                            //   MaterialPageRoute(
+                            //     builder: (context) => HesabKetab()
+                            //   ),
+                            //   (Route<dynamic> route) => false
+                            //   // ModalRoute.withName("/HesabKetab") 
+                            // );
                           }
                           
                           

@@ -13,6 +13,7 @@ logout(context, scaffoldKey) async {
   final _apiURL =  _apiConfig.apiUrl('logout');
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   var user = prefs.getString('user');
+  prefs.getString('user');
   final Map _userData =jsonDecode(prefs.getString('user')); 
   final String _access_token = prefs.getString('access_token');
   final Map<String, String> _headers = {                    
@@ -30,11 +31,13 @@ logout(context, scaffoldKey) async {
       prefs.remove('access_token');
       NavigationService.instance.navigateToRemoveUntil('/login');
     }else if(response.statusCode == 401){
+      prefs.remove('user');
+      prefs.remove('access_token');
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
-      throw ('Internal server error \n ${response.body} \n Status Code ${response.statusCode}');
+      throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status ${response.body} Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e){
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -64,11 +67,11 @@ fetchMainMeters() async {
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
-      throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw ('${data['message']} \n ${response.statusCode}');
     } else if(response.statusCode == 500){
       throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     List data = List();
@@ -98,13 +101,13 @@ changeMainMeterStatus( context, scaffoldKey,  meterID, status) async {
    
     } else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
-      throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw('${data['message']} \n ${response.statusCode}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
-      throw ('Internal server error \n Status Code ${response.statusCode}');
+      throw ('Internal server error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch(e){
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -139,16 +142,16 @@ addSubMeters(BuildContext context, scaffoldKey, {meterID, submeterConsumer,meter
       return createSnackBar(data['message'], context, scaffoldKey);
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
-      throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw('${data['message']} \n ${response.statusCode}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
-      throw ('Internal server error \n Status Code ${response.statusCode}');
+      throw ('Internal server error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   }catch (e){
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -178,12 +181,12 @@ fetchSubmeter() async{
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
-      throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw ('${data['message']} \n ${response.statusCode}');
     } else if(response.statusCode == 500){
       
       throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     List data = List();
@@ -222,17 +225,17 @@ addBill(BuildContext context, scaffoldKey, _degreeTextFeildController ,  Map dat
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
-      throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw('${data['message']} \n ${response.statusCode}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       Map data = json.decode(response.body);
-      throw('Message: Server Internal Error With Status Code:  ${response.statusCode}');
+      throw('Internal Server  Error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -268,12 +271,12 @@ fetchBills() async{
       // handleUnauthorizedUser(response, context: null, scaffoldKey: null);
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
-      throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw ('${data['message']} \n ${response.statusCode}');
     } else if(response.statusCode == 500){
       
       throw ('Internal server error \n Status Code ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     List data = List();
@@ -309,18 +312,18 @@ addWaterMeter(BuildContext context, scaffoldKey ,  Map dataToBeSend) async{
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
-      throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw('${data['message']} \n ${response.statusCode}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw(' ${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
-      throw('Message: Server Internal Error With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error\n  ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('${e}', context, scaffoldKey, color: Colors.red);
@@ -353,12 +356,12 @@ fetchWaterMeter() async{
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
-      throw ('Message: ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw ('${data['message']} \n   ${response.statusCode}');
     } else if(response.statusCode == 500){
       
-      throw ('Internal server error \n Status Code ${response.statusCode}');
+      throw ('Internal server error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     List data = List();
@@ -390,18 +393,18 @@ editWaterMeter(context, scaffoldKey, Map<String, dynamic> dataToSend ) async{
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
     }else if(response.statusCode == 400) {
       Map data  = json.decode(response.body);
-      throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw('${data['message']} \n  ${response.statusCode}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
-      throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw(' Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -431,17 +434,17 @@ deleteWaterMeter( context, scaffoldKey, meterID)async{
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 400){
 
       Map data = json.decode(response.body);
-      throw('Message: ${data['message']}');
+      throw(' ${data['message']}');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
-      throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -469,18 +472,18 @@ changeWaterMeterStatus(context, scaffoldKey, meterID, status)async{
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 400){
 
       Map data = json.decode(response.body);
-      throw('Message: ${data['message']}');
+      throw('${data['message']}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       Map data = json.decode(response.body);
-      throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n  ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -510,18 +513,18 @@ addWaterNeighbor(context, scaffoldKey, Map dataToSend ) async {
     }else if(response.statusCode == 400){
 
       Map data = json.decode(response.body);
-      throw('Message: ${data['message']}');
+      throw('${data['message']}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
-      throw('Message: Server Internal Error With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n  ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('${e}', context, scaffoldKey, color: Colors.red);
@@ -552,12 +555,12 @@ fetchWaterNeighbor() async{
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
-      throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw ('${data['message']} \n   ${response.statusCode}');
     } else if(response.statusCode == 500){
       
-      throw ('Internal server error \n Status Code ${response.statusCode}');
+      throw ('Internal server error \n  ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     List data = List();
@@ -588,7 +591,7 @@ deleteWaterNeighbor(context, scaffoldKey, neighborID)async{
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw('${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 400){
 
       Map data = json.decode(response.body);
@@ -597,9 +600,9 @@ deleteWaterNeighbor(context, scaffoldKey, neighborID)async{
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       Map data = json.decode(response.body);
-      throw('Message: Internal Server Error \n With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -636,19 +639,20 @@ addWaterBill(context, scaffoldKey, peopleTextFieldData, dataToSend) async{
       return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
     }else if (response.statusCode == 422){
       Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
+      throw(' ${data['errors']} With Status Code:  ${response.statusCode}');
     }else if(response.statusCode == 400){
-
+      print(response.statusCode);
       Map data = json.decode(response.body);
-      throw('Message: ${data['message']}');
+      throw('${data['message']}');
     }else if(response.statusCode == 401){
+      print(response.statusCode);
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
-      throw('Message: Internal Server Error \n With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
@@ -668,7 +672,7 @@ fetchWaterBill()async{
                     'Authorization': _access_token,
                     };
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
-  
+
   try {
     final response = await http.post(_apiURL, body: (data), headers: _headers);
     if (response.statusCode == 200) {
@@ -678,14 +682,14 @@ fetchWaterBill()async{
       return data;
     }else if(response.statusCode == 404){
       Map data  = json.decode(response.body);
-      throw ('Message ${data['message']} \n Status Code:  ${response.statusCode}');
+      throw ('${data['message']} \n  ${response.statusCode}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
       
-      throw ('Internal server error \n Status Code ${response.statusCode}');
+      throw ('Internal server error \n ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     List data = List();
@@ -723,15 +727,15 @@ confirm(context, scaffoldKey, confirmationCode) async {
     }else if(response.statusCode == 400){
 
       Map data = json.decode(response.body);
-      throw('Message: ${data['message']}');
+      throw('${data['message']}');
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
     }else if(response.statusCode == 500){
 
       Map data = json.decode(response.body);
-      throw('Message: Internal Server Error \n With Status Code:  ${response.statusCode}');
+      throw('Internal Server Error \n   ${response.statusCode}');
     }else{
-      throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);

@@ -137,6 +137,7 @@ class _WaterBillsState extends State<WaterBills> {
                           );
 
                           var _neighbor = _billData[i]['neighbor_bills'];
+                          print(_neighbor);
                           for (var j = 0; j < _neighbor.length; j++) {
                             print(_neighbor[j]['waterneighbor']['neighbors_name']);
                             _billListWidget.add(

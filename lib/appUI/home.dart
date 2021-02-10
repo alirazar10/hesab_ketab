@@ -6,6 +6,7 @@ import 'package:hesab_ketab/appUI/add_water_bill.dart';
 import 'package:hesab_ketab/appUI/add_water_mater.dart';
 import 'package:hesab_ketab/appUI/elec_bill_show.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
+import 'package:hesab_ketab/utils/navigationService.dart';
 
 class Home extends StatefulWidget {
   // final Map userData;
@@ -151,7 +152,7 @@ class _HomeState extends State<Home> {
                       ),
                       child: InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => WaterBills()));
+                          NavigationService.instance.navigateTo('/waterBills');
                           
                         },
                         child: Column(

@@ -314,7 +314,8 @@ class _MainMeterListState extends State<MainMeterList> {
     return showDialog(
       // barrierDismissible:false,
       context: context,
-      child: AlertDialog(
+      builder: (BuildContext context){
+        return AlertDialog(
         title: Text('ویرایش میتر عمومی', style: myTextStyle(fontSize: 16.0),),
         content: SingleChildScrollView(
           child:Column(
@@ -439,7 +440,8 @@ class _MainMeterListState extends State<MainMeterList> {
             ],
           )
         ),
-      )
+      );
+      }
     );
   }
   deleteMainMeter(int meterID) async{
@@ -487,7 +489,8 @@ class _MainMeterListState extends State<MainMeterList> {
   myDelete({BuildContext context, meterID}){
     return showDialog(
       context: context,
-      child: AlertDialog(
+      builder: (BuildContext context){
+        return  AlertDialog(
         actionsPadding: EdgeInsets.all(20) ,
         elevation: 10.0,
         titleTextStyle:  myTextStyle(color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold,),
@@ -528,7 +531,8 @@ class _MainMeterListState extends State<MainMeterList> {
           ),
         ),
         
-      )
+      );
+      }
     );
   }
 }

@@ -219,9 +219,11 @@ class _AddMainMeterState extends State<AddMainMeter> {
                       Container(
                         width: width,
                         padding: EdgeInsets.only(top: height * 0.015),
-                        child: RaisedButton(
-                          padding: EdgeInsets.all(10.0),
-                          color: Color(0xFFFF5722),
+                        child: ElevatedButton (
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFFF5722)),
+                            padding: MaterialStateProperty.all(EdgeInsets.all(50))
+                          ),
                           child: Text('ثبت میتر' , style: myTextStyle(color: Colors.white),),
                           onPressed: () {
                             if(_addMainMeterFormKey.currentState.validate()){

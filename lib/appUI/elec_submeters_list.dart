@@ -285,7 +285,8 @@ deleteSubmeter(int meterID) async{
   myDelete({BuildContext context, meterID}){
     return showDialog(
       context: context,
-      child: AlertDialog(
+      builder: (BuildContext context){ 
+        return AlertDialog(
         actionsPadding: EdgeInsets.all(20) ,
         elevation: 10.0,
         titleTextStyle:  myTextStyle(color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold,),
@@ -325,7 +326,8 @@ deleteSubmeter(int meterID) async{
             ],
           ),
         ),
-      )
+      );
+      }
     );
   }
 

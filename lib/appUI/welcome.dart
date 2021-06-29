@@ -6,7 +6,7 @@ class Welcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      // resizeToAvoidBottomPadding: false,
       // resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(

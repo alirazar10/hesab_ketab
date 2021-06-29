@@ -20,7 +20,7 @@ class _AddSubmetersState extends State<AddSubmeters> {
   Future futureSubmeter;
   final GlobalKey<FormState> _submetersFormKey = new GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _submetersScaffoldKey = new GlobalKey<ScaffoldState>();
-  List _dropdownItmes = List();
+  List _dropdownItmes = [];
   String _dropdownValue;
   DateTime _mySelectedDate;
 
@@ -152,9 +152,11 @@ class _AddSubmetersState extends State<AddSubmeters> {
                     Container(
                       width: width,
                       padding: EdgeInsets.only(top: height * 0.015),
-                      child: RaisedButton(
-                        padding: EdgeInsets.all(10.0),
-                        color: Color(0xFFFF5722),
+                      child: ElevatedButton (
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFFF5722)),
+                          padding: MaterialStateProperty.all(EdgeInsets.all(50))
+                        ),
                         child: Text('ثبت میتر فرعی' , style: myTextStyle(color: Colors.white),),
                         onPressed: () {
                           if(_submetersFormKey.currentState.validate()){

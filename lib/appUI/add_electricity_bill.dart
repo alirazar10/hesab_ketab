@@ -22,12 +22,12 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
   final GlobalKey<FormState> _addBillFromKey = GlobalKey<FormState>();
   TextEditingController _payableBillController = TextEditingController();
   TextEditingController _readingTurnBillController = TextEditingController();
-  List _dropdownItmes = List();
+  List _dropdownItmes = [];
   String _dropdownValue;
   DateTime _mySelectedDateIssue;
   DateTime _mySelectedDateEnd = DateTime.now();
   int _submeterNo;
-  List _submeterInfo = List();
+  List _submeterInfo = [];
   List<Widget> _children = [];
   Map < String, TextEditingController> _degreeTextFeildController = Map();
   var height;
@@ -54,7 +54,7 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
         // then parse the JSON.
         List data  = json.decode(response.body);
         // print(data);
-        List res = new List();
+        List res = [];
         for( var i = 0; i < data.length; i++){
           if(data[i]['status'] == 1){
             if(data[i]['submeters'].length != 0){
@@ -75,7 +75,7 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
         throw('Message: Unkown Error Status Code:  ${response.statusCode}');
       }
     } catch (e) {
-      List data = List();
+      List data = [];
       data.add({'error': true, 'message': '${e.toString()}'});
       setState(() {
         _dropdownItmes = data;
@@ -145,14 +145,14 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
               child: SingleChildScrollView(
                 // controller: controller,
                 child: Column(
-                  children: _dropdownItmes.isEmpty ? [ //checks if it has data if yes display loading
+                  children: _dropdownItmes.isEmpty ? ( //checks if it has data if yes display loading
                   Container(
                     alignment: Alignment.center,
                     height: this.height - 100 ,
                     child: CircularProgressIndicator())
-                ] : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? [ //check if it hass error if yes show error
-                  showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message']),
-                ]:  [
+                  ) : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? ( //check if it hass error if yes show error
+                    showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message'])
+                  ):  [
                     Container(
                       child: DropdownButtonFormField(
                           
@@ -262,9 +262,13 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
                     Container(
                       width: width,
                       padding: EdgeInsets.only(top: height * 0.015),
-                      child: RaisedButton(
-                        padding: EdgeInsets.all(10.0),
-                        color: Color(0xFFFF5722),
+                      child: ElevatedButton (
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFFF5722)),
+                          padding: MaterialStateProperty.all(EdgeInsets.all(50))
+                        ),
+                        
+                        // color: Color(0xFFFF5722),
                         child: Text('ثبت و محاسبه بل' , style: myTextStyle(color: Colors.white),),
                         onPressed: () async{
                           if(_addBillFromKey.currentState.validate()){

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'package:hesab_ketab/myWidgets/date_time_picker.dart';
 import 'package:hesab_ketab/utils/database_activity.dart';
@@ -20,9 +19,9 @@ class _AddWaterBillState extends State<AddWaterBill> {
   var width;
   var bottomInset;
   // Future _futureWater;
-  List _dropdownItmes = List();
+  List _dropdownItmes = [];
   String _dropdownValue;
-  List _neighborInfo = List();
+  List _neighborInfo = [];
   List<Widget> _children = [];
   Map < String, TextEditingController> _peopleTextFeildController = Map();
   
@@ -221,8 +220,10 @@ class _AddWaterBillState extends State<AddWaterBill> {
                   children: _children,
                 ),
                 SizedBox(height: height * 0.022,),
-                RaisedButton(
-                  color: Color(0xFFFF5722),
+                ElevatedButton (
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFFF5722)),
+                  ),
                   child: Text('ثبت و محاسبه'),
                   onPressed: () async{
                     if(_addWaterBillFormKey.currentState.validate()){

@@ -178,7 +178,8 @@ class _WaterNeighborListState extends State<WaterNeighborList> {
   myDelete({BuildContext context, meterID}){
     return showDialog(
       context: context,
-      child: AlertDialog(
+      builder: (BuildContext context){
+      return AlertDialog(
         actionsPadding: EdgeInsets.all(20) ,
         elevation: 10.0,
         titleTextStyle:  myTextStyle(color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold,),
@@ -194,8 +195,10 @@ class _WaterNeighborListState extends State<WaterNeighborList> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  RaisedButton(
-                    color: Colors.red,
+                  ElevatedButton (
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                    ),
                     child: Text('حذف', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
                     onPressed: (){
                       setState(() {
@@ -206,8 +209,10 @@ class _WaterNeighborListState extends State<WaterNeighborList> {
                     }
                   ),
                   // SizedBox(width: 25,),
-                  RaisedButton(
-                    color: Color(0xff00BCD4),
+                  ElevatedButton (
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff00BCD4)),
+                    ),
                     child: Text('لغو', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
                     onPressed: (){
                       Navigator.of(context, rootNavigator: true).pop();
@@ -218,7 +223,8 @@ class _WaterNeighborListState extends State<WaterNeighborList> {
             ],
           ),
         ),
-      )
+      );
+      }
     );
   }
 }

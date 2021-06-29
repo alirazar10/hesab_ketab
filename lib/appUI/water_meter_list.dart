@@ -183,8 +183,11 @@ class _WatermeterlistState extends State<Watermeterlist> {
                                             
                                           ],
                                         ),
-                                        OutlineButton(
-                                          color: Color(0xFFFF5622),
+                                        OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            primary: Color(0xFFFF5722),
+                                          ),
+                                          
                                           onPressed: (){
                                             var st = status == 1 ? 0 : 1;
                                             
@@ -226,7 +229,8 @@ class _WatermeterlistState extends State<Watermeterlist> {
   editWaterInfo( BuildContext context, scaffoldKey ,Map dataToEdit){
     return showDialog(
       context: context,
-      child: AlertDialog(
+      builder: (BuildContext context){
+        return  AlertDialog(
         elevation: 10.0,
         titleTextStyle:  myTextStyle(color: Colors.grey, fontSize: 18.0, fontWeight: FontWeight.bold,),
         title: Text('ویرایش میتر اب'),
@@ -357,14 +361,16 @@ class _WatermeterlistState extends State<Watermeterlist> {
           ),
         ),
         
-      )
+      );
+      }
     );
   }
 
   myDelete({BuildContext context, scaffoldKey , meterID}){
     return showDialog(
       context: context,
-      child: AlertDialog(
+      builder: (BuildContext context){
+        return AlertDialog(
         actionsPadding: EdgeInsets.all(20) ,
         elevation: 10.0,
         titleTextStyle:  myTextStyle(color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold,),
@@ -406,7 +412,8 @@ class _WatermeterlistState extends State<Watermeterlist> {
           ),
         ),
         
-      )
+      );
+      }
     );
   }
 

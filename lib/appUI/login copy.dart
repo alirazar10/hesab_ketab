@@ -220,7 +220,7 @@ class _RegisterState extends State<Register> {
             FocusScope.of(context).requestFocus(new FocusNode());
       },
       child: Scaffold(
-        resizeToAvoidBottomPadding: false,
+        // resizeToAvoidBottomPadding: false,
         resizeToAvoidBottomInset: false,
       // color: Colors.transparent,
         body: Form(

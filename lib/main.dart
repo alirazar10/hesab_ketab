@@ -75,8 +75,8 @@ class _SplashScreenState extends State<SplashScreen> {
   duration() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var email = prefs.getString('user');
-    prefs.remove('user');
-    prefs.remove('toLogin');
+    // prefs.remove('user');
+    // prefs.remove('toLogin');
     var firstTimeSeen = prefs.getBool('toLogin');
     Future.delayed(Duration(seconds: 3),(){
 

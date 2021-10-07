@@ -26,7 +26,7 @@ class _LoginState extends State<Login> {
     var apiConfig = new API_Config();
     try{
       var response = await http.post(
-        apiConfig.apiUrl('login'),
+        Uri.parse(apiConfig.apiUrl('login')),
         body: {
           "username": this._username,
           "password": this._password,
@@ -269,7 +269,7 @@ class _RegisterState extends State<Register> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try{
       var response = await http.post(
-        apiConfig.apiUrl('resgister'),
+        Uri.parse(apiConfig.apiUrl('resgister')),
         body: {
           "username": this._email,
           "password": this._password,

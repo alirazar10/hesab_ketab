@@ -254,7 +254,7 @@ deleteSubmeter(int meterID) async{
 
     try{
       var response = await http.post(
-        this._apiUrl,
+        Uri.parse(this._apiUrl),
         body: _submeterData, 
         headers: _header,
       );

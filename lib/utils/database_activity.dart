@@ -24,7 +24,7 @@ logout(context, scaffoldKey) async {
   // prefs.remove('access_token');
   
   try{
-    var response = await http.post(_apiURL, body: {'user_id': _userData['user_id'].toString()}, headers: _headers);
+    var response = await http.post(Uri.parse(_apiURL), body: {'user_id': _userData['user_id'].toString()}, headers: _headers);
 
     if(response.statusCode == 201){
       prefs.remove('user');
@@ -57,7 +57,7 @@ fetchMainMeters() async {
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
  
   try {
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -92,7 +92,7 @@ changeMainMeterStatus( context, scaffoldKey,  meterID, status) async {
                     };
   final Map<String, String> data = {'user_id': _userData['user_id'].toString(), 'id': meterID.toString() ,'status': status.toString()};
   try{
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     if (response.statusCode == 201) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -133,7 +133,7 @@ addSubMeters(BuildContext context, scaffoldKey, {meterID, submeterConsumer,meter
                 'Authorization': _access_token,};
   try{
     var response = await http.post(
-      _apiUrl,
+      Uri.parse(_apiUrl),
       body: _mainMeterData, 
       headers: _header,
     );
@@ -171,7 +171,7 @@ fetchSubmeter() async{
                     };
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
   try {
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -216,7 +216,7 @@ addBill(BuildContext context, scaffoldKey, _degreeTextFeildController ,  Map dat
 
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: dataToSend, 
       headers: _headers,
     );
@@ -257,10 +257,10 @@ fetchBills() async{
                     };
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
   
-  // final response = await http.post(_apiURL, body: (data), headers: _headers);
+  // final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
   
   try {
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -303,7 +303,7 @@ addWaterMeter(BuildContext context, scaffoldKey ,  Map dataToBeSend) async{
     
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: dataToBeSend, 
       headers: _headers,
     );
@@ -345,7 +345,7 @@ fetchWaterMeter() async{
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
   
   try {
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     print(response.body);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
@@ -383,7 +383,7 @@ editWaterMeter(context, scaffoldKey, Map<String, dynamic> dataToSend ) async{
     
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: dataToSend, 
       headers: _headers,
     );
@@ -422,7 +422,7 @@ deleteWaterMeter( context, scaffoldKey, meterID)async{
     
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: {'id': meterID.toString()}, 
       headers: _headers,
     );
@@ -463,7 +463,7 @@ changeWaterMeterStatus(context, scaffoldKey, meterID, status)async{
     
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: {'id': meterID.toString(), 'status': status.toString()}, 
       headers: _headers,
     );
@@ -503,7 +503,7 @@ addWaterNeighbor(context, scaffoldKey, Map dataToSend ) async {
   try {
     
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: dataToSend, 
       headers: _headers,
     );
@@ -545,7 +545,7 @@ fetchWaterNeighbor() async{
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
   
   try {
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -581,7 +581,7 @@ deleteWaterNeighbor(context, scaffoldKey, neighborID)async{
                     };
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: {'id': neighborID.toString()}, 
       headers: _headers,
     );
@@ -630,7 +630,7 @@ addWaterBill(context, scaffoldKey, peopleTextFieldData, dataToSend) async{
   
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: dataToSend, 
       headers: _headers,
     );
@@ -674,7 +674,7 @@ fetchWaterBill()async{
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
 
   try {
-    final response = await http.post(_apiURL, body: (data), headers: _headers);
+    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -714,7 +714,7 @@ confirm(context, scaffoldKey, confirmationCode) async {
 
   try {
     var response = await http.post(
-      _apiURL,
+      Uri.parse(_apiURL),
       body: dataToSend, 
       headers: _headers,
     );

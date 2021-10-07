@@ -32,13 +32,13 @@ dependencies:
   ###################
   # added packages 
   # package for http requests
-  http: ^0.12.2
+  http: ^0.13.0
   # font awesome for flutter package
   font_awesome_flutter: ^8.10.0
   #this package is for alert boxes
   rflutter_alert: ^1.1.0 
   # package dor storing data in device
-  shared_preferences: ^0.5.12
+  shared_preferences: ^2.0.6
   
   # Text animating Package
   animated_text_kit: ^3.1.0

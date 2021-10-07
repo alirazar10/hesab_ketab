@@ -1,4 +1,4 @@
-package com.example.hesab_ketab
+package com.imor.hesab_ketab
 
 import io.flutter.embedding.android.FlutterActivity
 

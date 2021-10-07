@@ -48,7 +48,7 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
                       };
     final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
     try {
-      final response = await http.post(_apiURL, body: (data), headers: _headers);
+      final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
       if (response.statusCode == 200) {
         // If the server did return a 200 OK response,
         // then parse the JSON.
@@ -145,14 +145,14 @@ class _AddElectricityBillState extends State<AddElectricityBill> {
               child: SingleChildScrollView(
                 // controller: controller,
                 child: Column(
-                  children: _dropdownItmes.isEmpty ? ( //checks if it has data if yes display loading
+                  children: _dropdownItmes.isEmpty ? [ //checks if it has data if yes display loading
                   Container(
                     alignment: Alignment.center,
                     height: this.height - 100 ,
                     child: CircularProgressIndicator())
-                  ) : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? ( //check if it hass error if yes show error
+                  ] : _dropdownItmes[0]['error'] != null && _dropdownItmes[0]['error'] == true ? [ //check if it hass error if yes show error
                     showExceptionMsg(context: this._context, message: _dropdownItmes[0]['message'])
-                  ):  [
+                  ]:  [
                     Container(
                       child: DropdownButtonFormField(
                           

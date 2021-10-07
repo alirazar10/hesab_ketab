@@ -268,7 +268,7 @@ class _MainMeterListState extends State<MainMeterList> {
                   'Authorization': _access_token,};
     // print(_mainMeterData);
     var response = await http.post(
-      this._apiUrl,
+      Uri.parse(this._apiUrl),
       body: _mainMeterData, 
       headers: _header,
     );
@@ -284,7 +284,7 @@ class _MainMeterListState extends State<MainMeterList> {
     }
     try {
       var response = await http.post(
-        this._apiUrl,
+        Uri.parse(this._apiUrl),
         body: _mainMeterData, 
         headers: _header,
       );
@@ -460,7 +460,7 @@ class _MainMeterListState extends State<MainMeterList> {
     // print(_mainMeterData);
     try{
       var response = await http.post(
-        this._apiUrl,
+        Uri.parse(this._apiUrl),
         body: _mainMeterData, 
         headers: _header,
       );

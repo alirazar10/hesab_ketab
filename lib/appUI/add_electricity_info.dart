@@ -55,7 +55,7 @@ class _AddMainMeterState extends State<AddMainMeter> {
     
     try{
       var response = await http.post(
-        this._apiUrl,
+        Uri.parse(this._apiUrl),
         body: _mainMeterData, 
         headers: _header,
       );

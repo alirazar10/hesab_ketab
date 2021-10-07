@@ -33,7 +33,7 @@ class API_Config {
       "login": "http://hk.imorgroup.com/api/login",
       "resgister": "http://hk.imorgroup.com/api/registration",
       'checkConfirmationCode' : "http://hk.imorgroup.com/api/checkconfirmationcode",
-
+      
       "logout": "http://hk.imorgroup.com/api/logout",
       'addMainMeter': "http://hk.imorgroup.com/api/addmainmeter",
       'fetchMainMeters': "http://hk.imorgroup.com/api/fetchmainmeters",
@@ -55,7 +55,7 @@ class API_Config {
       'fetchWaterNeighbor' : "http://hk.imorgroup.com/api/fetchwaterneighbor",
       'deleteWaterNeighbor' : "http://hk.imorgroup.com/api/deletewaterneighbor",
       'addWaterBill' : "http://hk.imorgroup.com/api/addwaterbill",
-      'fetchWaterBills' : "http://hk.imorgroup.com/api/fetchwaterbills",
+      'fetchWaterBills' : "https://hk.imorgroup.com/api/fetchwaterbills",
     };
     print(urlMap[urlKey]);
     return urlMap[urlKey];

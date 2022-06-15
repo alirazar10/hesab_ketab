@@ -189,7 +189,7 @@ fetchSubmeter() async{
       throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
-    List data = List();
+    List data = [];
     data.add({'error': true, 'message': '${e.toString()}'});
     return data; 
   }

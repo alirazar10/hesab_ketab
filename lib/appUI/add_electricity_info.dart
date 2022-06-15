@@ -222,7 +222,7 @@ class _AddMainMeterState extends State<AddMainMeter> {
                         child: ElevatedButton (
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFFF5722)),
-                            padding: MaterialStateProperty.all(EdgeInsets.all(50))
+                            // padding: MaterialStateProperty.all(EdgeInsets.all(50))
                           ),
                           child: Text('ثبت میتر' , style: myTextStyle(color: Colors.white),),
                           onPressed: () {

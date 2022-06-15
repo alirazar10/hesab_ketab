@@ -294,6 +294,12 @@ class _RegisterState extends State<Register> {
         throw ('${data['message']} ${response.statusCode}');
       }else if(response.statusCode == 500){
         throw ('Internal server error \n Status Code ${response.statusCode}');
+      }else if(response.statusCode == 422){
+        Map data = json.decode(response.body);
+        for (String key in data['errors'].keys){
+        
+        throw('${data['errors'][key]}');
+        }
       }else{
         throw('Message: Unkown Error \n Status Code:  ${response.statusCode}');
       }

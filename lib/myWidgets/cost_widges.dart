@@ -85,7 +85,7 @@ Widget showExceptionMsg({BuildContext context, message}){
           ),
           child: Column(
             children: [
-            Icon(Icons.warning_amber_outlined, size: 60.0, color: Color(0xD0FF5622),),
+            Icon(Icons.warning_amber_rounded, size: 60.0, color: Color(0xD0FF5622),),
 
               Text(
                 '$message',

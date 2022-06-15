@@ -268,7 +268,7 @@ class _BillsState extends State<Bills> {
                         );
                       }
                       else{
-                        return Container();
+                        return  showExceptionMsg(context: this._context, message: 'بل پیدا نشد. هنوز بل ثبت نشد. ');
                       }
                       
                     },

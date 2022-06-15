@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hesab_ketab/appUI/email_confirmation.dart';
 import 'package:hesab_ketab/myWidgets/cost_widges.dart';
@@ -8,7 +9,8 @@ import '../utils/api_config.dart';
 import 'dart:convert';
 import 'hesab_ketab.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
+import 'package:url_launcher/link.dart';
+import 'package:url_launcher/url_launcher.dart';
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
@@ -261,7 +263,7 @@ class _RegisterState extends State<Register> {
   String _password;
   String _confirm_password;
   var waitForResponse = false;
-
+final  policyLink =  'https://sites.google.com/view/hesabketab-at-imorgroup/home';
   
 
   void registration() async {
@@ -443,9 +445,47 @@ class _RegisterState extends State<Register> {
                       SizedBox(height: 30,),
                       Container( 
                         
-                        child: Text(
-                          'By Registering you are agreeing Term of use and Policy',
-                          textAlign: TextAlign.center,
+                        child: Column(
+                          children: [
+                            // Container(
+                            //   margin: EdgeInsets.only(bottom: 4),
+                            //   padding: EdgeInsets.all(4),
+                            //   child: InkWell(
+                            //     onTap: () async => await canLaunch(policyLink) ? await launch(policyLink) : throw 'Could not launch $policyLink' ,
+                            //     child: Text("با استفاده از برنامه ما، با شرایط استفاده و سیاست حفظ حریم خصوصی موافقت می کنید", style: TextStyle(color: Colors.deepPurple[300], fontWeight: FontWeight.w500))),
+                            // ),
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w400),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'با استفاده از برنامه ما، شما با ',
+                                    style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w400),
+                                  ),
+                                  TextSpan(
+                                      text: 'شرایط استفاده',
+                                      style: TextStyle(color: Colors.blue[400], fontWeight: FontWeight.w500, decoration: TextDecoration.underline),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap =  () async => await canLaunch(policyLink) ? await launch(policyLink) : throw 'Could not launch $policyLink' ,
+                                  ),
+                                  TextSpan(
+                                    text: ' و ',
+                                    style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w400),
+                                  ),
+                                  TextSpan(
+                                      text: 'سیاست حفظ حریم خصوصی',
+                                      style: TextStyle(color: Colors.blue[400], fontWeight: FontWeight.w500, decoration: TextDecoration.underline ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap =  () async => await canLaunch(policyLink) ? await launch(policyLink) : throw 'Could not launch $policyLink' ,
+                                  ),
+                                  TextSpan(
+                                    text: ' موافقت می کنید ', 
+                                    style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w400),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 10,),

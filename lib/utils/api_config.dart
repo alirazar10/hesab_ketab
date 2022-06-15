@@ -55,7 +55,7 @@ class API_Config {
       'fetchWaterNeighbor' : "http://hk.imorgroup.com/api/fetchwaterneighbor",
       'deleteWaterNeighbor' : "http://hk.imorgroup.com/api/deletewaterneighbor",
       'addWaterBill' : "http://hk.imorgroup.com/api/addwaterbill",
-      'fetchWaterBills' : "https://hk.imorgroup.com/api/fetchwaterbills",
+      'fetchWaterBills' : "http://hk.imorgroup.com/api/fetchwaterbills",
     };
     print(urlMap[urlKey]);
     return urlMap[urlKey];

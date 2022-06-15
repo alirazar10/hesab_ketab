@@ -54,6 +54,7 @@ class _WaterBillsState extends State<WaterBills> {
 
                       List<Widget> _billListWidget = List();
                       if(data[index]['waterbills'].length != 0){
+                        print('object in if');
                         var _billData = data[index]['waterbills'];
                         for (var i = 0; i < _billData.length; i++) {
                           print(data);
@@ -234,6 +235,8 @@ class _WaterBillsState extends State<WaterBills> {
                           }
 
                         }
+                      }else{
+                        return  showExceptionMsg(context: this._context, message: 'بل پیدا نشد. هنوز بل ثبت نشد. ');
                       }
                       
                       return Material(

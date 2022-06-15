@@ -74,7 +74,7 @@ fetchMainMeters() async {
       throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
-    List data = List();
+    List data = [];
     data.add({'error': true, 'message': '${e.toString()}'});
     return data; 
   }
@@ -257,7 +257,7 @@ fetchBills() async{
                     };
   final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
   
-  // final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
+
   
   try {
     final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
@@ -265,6 +265,7 @@ fetchBills() async{
       // If the server did return a 200 OK response,
       // then parse the JSON.
       List data  = json.decode(response.body);
+      print(data);
       return data;
     }else if(response.statusCode == 401){
       NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
@@ -279,7 +280,7 @@ fetchBills() async{
       throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
-    List data = List();
+    List data = [];
     data.add({'error': true, 'message': '${e.toString()}'});
     print(e);
     return data; 
@@ -364,7 +365,7 @@ fetchWaterMeter() async{
       throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
-    List data = List();
+    List data = [];
     data.add({'error': true, 'message': '${e.toString()}'});
     return data; 
   }
@@ -563,7 +564,7 @@ fetchWaterNeighbor() async{
       throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
-    List data = List();
+    List data = [];
     data.add({'error': true, 'message': '${e.toString()}'});
     return data; 
 
@@ -692,7 +693,7 @@ fetchWaterBill()async{
       throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
-    List data = List();
+    List data = [];
     data.add({'error': true, 'message': '${e.toString()}'});
     return data; 
 

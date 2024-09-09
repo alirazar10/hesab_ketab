@@ -1,747 +1,503 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:hesab_ketab/appUI/login.dart';
-import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 
-import 'package:hesab_ketab/utils/api_config.dart';
+import 'package:flutter/material.dart';
+import 'package:hesab_ketab/myWidgets/cost_widgets.dart';
+import 'package:hesab_ketab/utils/utils.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'navigationService.dart';
 
-logout(context, scaffoldKey) async {
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('logout');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  var user = prefs.getString('user');
-  prefs.getString('user');
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  // prefs.remove('user');
-  // prefs.remove('access_token');
-  
-  try{
-    var response = await http.post(Uri.parse(_apiURL), body: {'user_id': _userData['user_id'].toString()}, headers: _headers);
+logout(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('signout');
+  print(userData);
 
-    if(response.statusCode == 201){
-      prefs.remove('user');
-      prefs.remove('access_token');
-      NavigationService.instance.navigateToRemoveUntil('/login');
-    }else if(response.statusCode == 401){
-      prefs.remove('user');
-      prefs.remove('access_token');
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      throw ('Internal server error \n Status Code ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e){
-    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
-  }
-}
-fetchMainMeters() async {
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('fetchMainMeters');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
- 
   try {
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      return data;
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 404){
-      Map data  = json.decode(response.body);
-      throw ('${data['message']} \n ${response.statusCode}');
-    } else if(response.statusCode == 500){
-      throw ('Internal server error \n Status Code ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 202) {
+      prefs.remove('user');
+      prefs.remove('accessToken');
+      NavigationService.instance.navigateToRemoveUntil('/login');
     }
   } catch (e) {
-    List data = [];
-    data.add({'error': true, 'message': '${e.toString()}'});
-    return data; 
-  }
-}
-
-changeMainMeterStatus( context, scaffoldKey,  meterID, status) async {
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('changeStatusMainMeters');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString(), 'id': meterID.toString() ,'status': status.toString()};
-  try{
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    if (response.statusCode == 201) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      Map data  = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey );
-   
-    } else if(response.statusCode == 400) {
-      Map data  = json.decode(response.body);
-      throw('${data['message']} \n ${response.statusCode}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      throw ('Internal server error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch(e){
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
 
-addSubMeters(BuildContext context, scaffoldKey, {meterID, submeterConsumer,meterDegree, mySelectedDate, date}) async {
-  final _apiConfig  = new API_Config();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String _apiUrl = _apiConfig.apiUrl('addSubMeters');
-  String _userData = prefs.getString('user');
-  Map _mainMeterData ={
-    'mainmeter_id' : meterID, 
-    'submeter_consumer' : submeterConsumer, 
-    'meter_degree' : meterDegree,
-    'date' : date.toString(),
-    'user' : _userData,
-  };
-  String _access_token = prefs.getString('access_token');
-  Map<String, String> _header = {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "Accept": 'application/json',
-                'Authorization': _access_token,};
-  try{
-    var response = await http.post(
-      Uri.parse(_apiUrl),
-      body: _mainMeterData, 
-      headers: _header,
+fetchMainMeters() async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('fetchMainMeters');
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
     );
-    if(response.statusCode == 201){
+    return handleHttpResponse(response, null, null);
+  } catch (e) {
+    return [
+      {'error': true, 'message': '$e'}
+    ];
+  }
+}
+
+changeMainMeterStatus(BuildContext context,
+    GlobalKey<ScaffoldState> scaffoldKey, String meterID, int status) async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('changeStatusMainMeters');
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {
+        'user_id': userData['id'].toString(),
+        'id': meterID,
+        'status': status,
+      },
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
       Map data = json.decode(response.body);
       return createSnackBar(data['message'], context, scaffoldKey);
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400) {
-      Map data  = json.decode(response.body);
-      throw('${data['message']} \n ${response.statusCode}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      throw ('Internal server error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
-  }catch (e){
+  } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
 
-fetchSubmeter() async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('fetchSubmeters');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
+addSubMeters(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    {String? meterID,
+    String? submeterConsumer,
+    String? meterDegree,
+    DateTime? date}) async {
+  final prefs = await getSharedPreferences();
+  final userData = prefs.getString('user');
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('addSubMeters');
+
+  final mainMeterData = {
+    'mainmeter_id': meterID,
+    'submeter_consumer': submeterConsumer,
+    'meter_degree': meterDegree,
+    'date': date.toString(),
+    'user': userData,
+  };
+
   try {
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      return data;
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 404){
-      Map data  = json.decode(response.body);
-      throw ('${data['message']} \n ${response.statusCode}');
-    } else if(response.statusCode == 500){
-      
-      throw ('Internal server error \n Status Code ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: mainMeterData,
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
+      Map data = json.decode(response.body);
+      return createSnackBar(data['message'], context, scaffoldKey);
     }
   } catch (e) {
-    List data = [];
-    data.add({'error': true, 'message': '${e.toString()}'});
-    return data; 
+    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
 
-addBill(BuildContext context, scaffoldKey, _degreeTextFeildController ,  Map dataToSend) async{
-  
-  Map<String, String> submeterDegree = Map();
-  _degreeTextFeildController.forEach((key, value) { 
-    submeterDegree.addAll({key : value.text});
+fetchSubmeter() async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('fetchSubmeters');
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
+    );
+    return handleHttpResponse(response, null, null);
+  } catch (e) {
+    return [
+      {'error': true, 'message': '$e'}
+    ];
+  }
+}
+
+addBill(
+    BuildContext context,
+    GlobalKey<ScaffoldState> scaffoldKey,
+    Map<String, TextEditingController> degreeTextFieldController,
+    Map<String, String> dataToSend) async {
+  Map<String, String> submeterDegree = {};
+  degreeTextFieldController.forEach((key, value) {
+    submeterDegree[key] = value.text;
   });
-  
-  dataToSend.addAll(<String, String>{'submeterDegree' : "${json.encode(submeterDegree)}"});
 
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('addBillAndSubmeterDegree');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  dataToSend['user'] = prefs.getString('access_token');
+  dataToSend['submeterDegree'] = json.encode(submeterDegree);
+
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('addBillAndSubmeterDegree');
+  dataToSend['user'] = prefs.getString('access_token') as String;
 
   try {
     var response = await http.post(
-      Uri.parse(_apiURL),
-      body: dataToSend, 
-      headers: _headers,
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400) {
-      Map data  = json.decode(response.body);
-      throw('${data['message']} \n ${response.statusCode}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      Map data = json.decode(response.body);
-      throw('Internal Server  Error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e) {
-    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
-  }
-
-       
-}
-
-fetchBills() async{ 
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('fetchBills');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
-  
-
-  
-  try {
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      print(data);
-      return data;
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-      // handleUnauthorizedUser(response, context: null, scaffoldKey: null);
-    }else if(response.statusCode == 404){
-      Map data  = json.decode(response.body);
-      throw ('${data['message']} \n ${response.statusCode}');
-    } else if(response.statusCode == 500){
-      
-      throw ('Internal server error \n Status Code ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e) {
-    List data = [];
-    data.add({'error': true, 'message': '${e.toString()}'});
-    print(e);
-    return data; 
-  }
-  
-}
-
-
-
-addWaterMeter(BuildContext context, scaffoldKey ,  Map dataToBeSend) async{
-  
-    final _apiConfig  = new API_Config();
-    final _apiURL =  _apiConfig.apiUrl('addWaterMeter');
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String _accessToken = prefs.getString('access_token');
-    final Map<String, String> _headers = {                    
-                      "Accept": 'application/json',
-                      'Authorization': _accessToken,
-                      };
-    dataToBeSend['user'] = prefs.getString('user');
-    
-  try {
-    var response = await http.post(
-      Uri.parse(_apiURL),
-      body: dataToBeSend, 
-      headers: _headers,
-    );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if(response.statusCode == 400) {
-      Map data  = json.decode(response.body);
-      throw('${data['message']} \n ${response.statusCode}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw(' ${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 500){
-
-      Map data = json.decode(response.body);
-      throw('Internal Server Error\n  ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e) {
-    return createSnackBar('${e}', context, scaffoldKey, color: Colors.red);
-  }
-       
-}
-
-fetchWaterMeter() async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('fetchWaterMeter');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
-  
-  try {
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    print(response.body);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      return data;
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 404){
-      Map data  = json.decode(response.body);
-      throw ('${data['message']} \n   ${response.statusCode}');
-    } else if(response.statusCode == 500){
-      
-      throw ('Internal server error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e) {
-    List data = [];
-    data.add({'error': true, 'message': '${e.toString()}'});
-    return data; 
-  }
-}
-
-editWaterMeter(context, scaffoldKey, Map<String, dynamic> dataToSend ) async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('editWaterMeter');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String _accessToken = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _accessToken,
-                    };
-    // dataToSend['user'] = prefs.getString('user');
-    
-  try {
-    var response = await http.post(
-      Uri.parse(_apiURL),
-      body: dataToSend, 
-      headers: _headers,
+      Uri.parse(apiUrl),
+      body: dataToSend,
+      headers: headers,
     );
 
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if(response.statusCode == 400) {
-      Map data  = json.decode(response.body);
-      throw('${data['message']} \n  ${response.statusCode}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 500){
+    handleHttpResponse(response, context, scaffoldKey);
 
+    if (response.statusCode == 201) {
       Map data = json.decode(response.body);
-      throw('Internal Server Error \n ${response.statusCode}');
-    }else{
-      throw(' Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e) {
-    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
-  }
-}
-deleteWaterMeter( context, scaffoldKey, meterID)async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('deleteWaterMeter');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String _accessToken = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _accessToken,
-                    };
-    
-  try {
-    var response = await http.post(
-      Uri.parse(_apiURL),
-      body: {'id': meterID.toString()}, 
-      headers: _headers,
-    );
-
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400){
-
-      Map data = json.decode(response.body);
-      throw(' ${data['message']}');
-    }else if(response.statusCode == 500){
-
-      Map data = json.decode(response.body);
-      throw('Internal Server Error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
+      return createSnackBar(data['message'], context, scaffoldKey,
+          color: Colors.cyan);
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
 
-changeWaterMeterStatus(context, scaffoldKey, meterID, status)async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('changeWaterMeterStatus');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String _accessToken = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _accessToken,
-                    };
-    
+fetchBills() async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('fetchBills');
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
+    );
+    return handleHttpResponse(response, null, null);
+  } catch (e) {
+    return [
+      {'error': true, 'message': '$e'}
+    ];
+  }
+}
+
+addWaterMeter(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    Map<String, dynamic> dataToSend) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('addWaterMeter');
+  dataToSend['user'] = prefs.getString('user') as String;
+
   try {
     var response = await http.post(
-      Uri.parse(_apiURL),
-      body: {'id': meterID.toString(), 'status': status.toString()}, 
-      headers: _headers,
+      Uri.parse(apiUrl),
+      body: dataToSend,
+      headers: headers,
     );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400){
 
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
       Map data = json.decode(response.body);
-      throw('${data['message']}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      Map data = json.decode(response.body);
-      throw('Internal Server Error \n  ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
+      return createSnackBar(data['message'], context, scaffoldKey,
+          color: Colors.cyan);
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
 
-addWaterNeighbor(context, scaffoldKey, Map dataToSend ) async {
-    final _apiConfig  = new API_Config();
-    final _apiURL =  _apiConfig.apiUrl('addWaterNeighbor');
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String _accessToken = prefs.getString('access_token');
-    final Map<String, String> _headers = {                    
-                      "Accept": 'application/json',
-                      'Authorization': _accessToken,
-                      };
-    dataToSend['user'] = prefs.getString('user');
+fetchWaterMeter() async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('fetchWaterMeter');
+
   try {
-    
-    var response = await http.post(
-      Uri.parse(_apiURL),
-      body: dataToSend, 
-      headers: _headers,
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
     );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if(response.statusCode == 400){
-
-      Map data = json.decode(response.body);
-      throw('${data['message']}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 500){
-
-      Map data = json.decode(response.body);
-      throw('Internal Server Error \n  ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
+    return handleHttpResponse(response, null, null);
   } catch (e) {
-    return createSnackBar('${e}', context, scaffoldKey, color: Colors.red);
+    return [
+      {'error': true, 'message': '$e'}
+    ];
   }
 }
 
-fetchWaterNeighbor() async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('fetchWaterNeighbor');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
-  
-  try {
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      return data;
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 404){
-      Map data  = json.decode(response.body);
-      throw ('${data['message']} \n   ${response.statusCode}');
-    } else if(response.statusCode == 500){
-      
-      throw ('Internal server error \n  ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
-  } catch (e) {
-    List data = [];
-    data.add({'error': true, 'message': '${e.toString()}'});
-    return data; 
+editWaterMeter(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    Map<String, dynamic> dataToSend) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('editWaterMeter');
+  dataToSend['user'] = prefs.getString('user') as String;
 
-  }
-}
-
-deleteWaterNeighbor(context, scaffoldKey, neighborID)async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('deleteWaterNeighbor');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String _accessToken = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _accessToken,
-                    };
   try {
     var response = await http.post(
-      Uri.parse(_apiURL),
-      body: {'id': neighborID.toString()}, 
-      headers: _headers,
+      Uri.parse(apiUrl),
+      body: dataToSend,
+      headers: headers,
     );
 
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400){
+    handleHttpResponse(response, context, scaffoldKey);
 
+    if (response.statusCode == 201) {
       Map data = json.decode(response.body);
-      throw('Message: ${data['message']}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      Map data = json.decode(response.body);
-      throw('Internal Server Error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
+      return createSnackBar(data['message'], context, scaffoldKey,
+          color: Colors.cyan);
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
 }
 
-addWaterBill(context, scaffoldKey, peopleTextFieldData, dataToSend) async{
+deleteWaterMeter(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    int meterID) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('deleteWaterMeter');
+
+  try {
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'id': meterID},
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
+      Map data = json.decode(response.body);
+      return createSnackBar(data['message'], context, scaffoldKey);
+    }
+  } catch (e) {
+    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
+  }
+}
+
+changeWaterMeterStatus(BuildContext context,
+    GlobalKey<ScaffoldState> scaffoldKey, String meterID, int status) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('changeWaterMeterStatus');
+
+  try {
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: {
+        'id': meterID,
+        'status': status,
+      },
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
+      Map data = json.decode(response.body);
+      return createSnackBar(data['message'], context, scaffoldKey);
+    }
+  } catch (e) {
+    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
+  }
+}
+
+addWaterNeighbor(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    Map<String, dynamic> dataToSend) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('addWaterNeighbor');
+  dataToSend['user'] = prefs.getString('user') as String;
+
+  try {
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: dataToSend,
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
+      Map data = json.decode(response.body);
+      return createSnackBar(data['message'], context, scaffoldKey,
+          color: Colors.cyan);
+    }
+  } catch (e) {
+    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
+  }
+}
+
+fetchWaterNeighbor() async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('fetchWaterNeighbor');
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
+    );
+    return handleHttpResponse(response, null, null);
+  } catch (e) {
+    return [
+      {'error': true, 'message': '$e'}
+    ];
+  }
+}
+
+deleteWaterNeighbor(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    int neighborID) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('deleteWaterNeighbor');
+
+  try {
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'id': neighborID},
+      headers: headers,
+    );
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
+      Map data = json.decode(response.body);
+      return createSnackBar(data['message'], context, scaffoldKey);
+    }
+  } catch (e) {
+    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
+  }
+}
+
+addWaterBill(
+    BuildContext context,
+    GlobalKey<ScaffoldState> scaffoldKey,
+    Map<String, TextEditingController> peopleTextFieldData,
+    Map<String, dynamic> dataToSend) async {
+  final prefs = await getSharedPreferences();
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('addWaterBill');
+  dataToSend['user'] = prefs.getString('user') as String;
   Map<String, String> neighborPeople = Map();
-  peopleTextFieldData.forEach((key, value) { 
-    neighborPeople.addAll({key : value.text});
+  peopleTextFieldData.forEach((key, value) {
+    neighborPeople.addAll({key: value.text});
   });
 
-  dataToSend.addAll(<String, String>{'neighborPeople' : "${json.encode(neighborPeople)}"});
+  dataToSend.addAll(
+      <String, String>{'neighborPeople': "${json.encode(neighborPeople)}"});
 
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('addWaterBill');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  dataToSend['user'] = prefs.getString('access_token');
-
-  
   try {
     var response = await http.post(
-      Uri.parse(_apiURL),
-      body: dataToSend, 
-      headers: _headers,
+      Uri.parse(apiUrl),
+      body: dataToSend,
+      headers: headers,
     );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], context, scaffoldKey, color: Colors.cyan);
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw(' ${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400){
-      print(response.statusCode);
-      Map data = json.decode(response.body);
-      throw('${data['message']}');
-    }else if(response.statusCode == 401){
-      print(response.statusCode);
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
 
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 201) {
       Map data = json.decode(response.body);
-      throw('Internal Server Error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
+      return createSnackBar(data['message'], context, scaffoldKey,
+          color: Colors.cyan);
     }
   } catch (e) {
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
-
 }
 
-fetchWaterBill()async{
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('fetchWaterBills');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> data = {'user_id': _userData['user_id'].toString()};
+fetchWaterBill() async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('fetchWaterBill');
 
   try {
-    final response = await http.post(Uri.parse(_apiURL), body: (data), headers: _headers);
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List data  = json.decode(response.body);
-      return data;
-    }else if(response.statusCode == 404){
-      Map data  = json.decode(response.body);
-      throw ('${data['message']} \n  ${response.statusCode}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-      
-      throw ('Internal server error \n ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
-    }
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: {'user_id': userData['id'].toString()},
+      headers: headers,
+    );
+    return handleHttpResponse(response, null, null);
   } catch (e) {
-    List data = [];
-    data.add({'error': true, 'message': '${e.toString()}'});
-    return data; 
-
+    return [
+      {'error': true, 'message': '$e'}
+    ];
   }
 }
 
-confirm(context, scaffoldKey, confirmationCode) async {
-  final _apiConfig  = new API_Config();
-  final _apiURL =  _apiConfig.apiUrl('checkConfirmationCode');
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  
-  final Map _userData =jsonDecode(prefs.getString('user')); 
-  final String _access_token = prefs.getString('access_token');
-  final Map<String, String> _headers = {                    
-                    "Accept": 'application/json',
-                    'Authorization': _access_token,
-                    };
-  final Map<String, String> dataToSend = {'user_id': _userData['user_id'].toString(), 'confirmation_code': confirmationCode.toString()};
+confirm(BuildContext context, GlobalKey<ScaffoldState> scaffoldKey,
+    confirmationCode) async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('checkConfirmationCode');
+  final Map<String, String> dataToSend = {
+    'userId': userData['id'].toString(),
+    'confirmation_code': confirmationCode.toString()
+  };
+  print(json.encode(dataToSend.toString()));
 
   try {
     var response = await http.post(
-      Uri.parse(_apiURL),
-      body: dataToSend, 
-      headers: _headers,
+      Uri.parse(apiUrl),
+      body: json.encode(dataToSend),
+      headers: headers,
     );
-    if(response.statusCode == 201){
+
+    handleHttpResponse(response, context, scaffoldKey);
+
+    if (response.statusCode == 202) {
       Map data = json.decode(response.body);
       return 'confirmed';
-    }else if (response.statusCode == 422){
-      Map data = json.decode(response.body);
-      throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
-    }else if(response.statusCode == 400){
-
-      Map data = json.decode(response.body);
-      throw('${data['message']}');
-    }else if(response.statusCode == 401){
-      NavigationService.instance.navigateToRemoveUntil('/unAuthUser');
-    }else if(response.statusCode == 500){
-
-      Map data = json.decode(response.body);
-      throw('Internal Server Error \n   ${response.statusCode}');
-    }else{
-      throw('Unkown Error Status Code:  ${response.statusCode}');
     }
   } catch (e) {
+    print(e);
     return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
   }
+}
 
+resendConfirmationsCode(
+    BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) async {
+  final prefs = await getSharedPreferences();
+  final userData = await getUserData(prefs);
+  final headers = await getHeaders(prefs);
+  final apiUrl = getApiUrl('resendConfirmationCode');
+  final Map<String, String> dataToSend = {
+    'userId': userData['id'].toString(),
+    'email': userData['email'].toString(),
+  };
+  try {
+    var response = await http.post(
+      Uri.parse(apiUrl),
+      body: json.encode(dataToSend),
+      headers: headers,
+    );
 
+    handleHttpResponse(response, context, scaffoldKey);
 
+    if (response.statusCode == 202) {
+      Map data = json.decode(response.body);
+      return createSnackBar(data['message'], context, scaffoldKey);
+    }
+  } catch (e) {
+    print(e);
+    return createSnackBar('$e', context, scaffoldKey, color: Colors.red);
+  }
 }

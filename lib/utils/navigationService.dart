@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
 
-class NavigationService{
+class NavigationService {
+  final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
-  GlobalKey<NavigatorState> navigationKey;
+  static final NavigationService instance = NavigationService._internal();
 
-  static NavigationService instance = NavigationService();
+  NavigationService._internal();
 
-  NavigationService(){
-    navigationKey = GlobalKey<NavigatorState>();
+  Future<dynamic> navigateToRemoveUntil(String routeName, {dynamic arguments}) {
+    return navigationKey.currentState!.pushNamedAndRemoveUntil(
+      routeName,
+      (Route<dynamic> route) => false,
+      arguments: arguments,
+    );
   }
 
-  Future<dynamic> navigateToRemoveUntil(String _rn, {dynamic arguments}){
-    return navigationKey.currentState.pushNamedAndRemoveUntil(_rn, (Route<dynamic> route) => false, arguments: arguments);
+  Future<dynamic> navigateTo(String routeName, {dynamic arguments}) {
+    return navigationKey.currentState!.pushNamed(
+      routeName,
+      arguments: arguments,
+    );
   }
 
-  Future<dynamic> navigateTo(String _rn, {dynamic arguments}){
-    return navigationKey.currentState.pushNamed(_rn, arguments: arguments);
+  Future<dynamic> navigateToRoute(MaterialPageRoute route) {
+    return navigationKey.currentState!.push(route);
   }
 
-  Future<dynamic> navigateToRoute(MaterialPageRoute _rn){
-    return navigationKey.currentState.push(_rn);
+  void goBack() {
+    return navigationKey.currentState!.pop();
   }
-
-  goback(){
-    return navigationKey.currentState.pop();
-  }
-
 }

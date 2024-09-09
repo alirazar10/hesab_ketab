@@ -1,87 +1,116 @@
 import 'package:flutter/material.dart';
-import 'package:hesab_ketab/myWidgets/cost_widges.dart';
 import 'package:hesab_ketab/utils/database_activity.dart';
 import 'home.dart';
 import 'show_electricity.dart';
 import 'show_water.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 class HesabKetab extends StatefulWidget {
-  final Map userData;
-  HesabKetab({Key key, this.userData}) : super(key: key);
+  final Map<String, dynamic> userData;
+
+  const HesabKetab({Key? key, required this.userData}) : super(key: key);
 
   @override
   _HesabKetabState createState() => _HesabKetabState();
 }
 
 class _HesabKetabState extends State<HesabKetab> {
-  final _hesabKetabScaffoldGlobalKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _hesabKetabScaffoldGlobalKey =
+      GlobalKey<ScaffoldState>();
 
-BuildContext _context;
-  
+  late BuildContext _context;
+
   @override
   Widget build(BuildContext context) {
     _context = context;
     return DefaultTabController(
+      length: 3,
+      initialIndex: 0,
       child: Scaffold(
         key: _hesabKetabScaffoldGlobalKey,
         appBar: AppBar(
           elevation: 10.0,
-          backgroundColor: Color(0xC2212121),
+          backgroundColor: Color(0xFF212121),
           actions: <Widget>[
-            // IconButton(icon: Icon(Icons.more_vert), onPressed: () { print('clicked'); },), 
             PopupMenuButton<String>(
               elevation: 20.0,
               onSelected: choiceAction,
-              itemBuilder: (BuildContext context){
-                  return Constants.choices.map((choice){
-                      return PopupMenuItem<String>(
-                          value: choice['value'],
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            // crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                // crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Icon(choice['icon'], color: Colors.grey,),
-                                  SizedBox(width: 10.0,),
-                                  Text(choice['value']),
-                                ],
-                              ),
-                              Divider()
-                            ],
-                          ),
-                      );
-                  }).toList();
+              iconColor: Colors.white,
+              itemBuilder: (BuildContext context) {
+                return Constants.choices.map((choice) {
+                  return PopupMenuItem<String>(
+                    value: choice['value'] as String,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(choice['icon'] as IconData,
+                                color: Colors.grey),
+                            const SizedBox(width: 10.0),
+                            Text(choice['value'] as String),
+                          ],
+                        ),
+                        const Divider(),
+                      ],
+                    ),
+                  );
+                }).toList();
               },
-            ) 
+            ),
           ],
           automaticallyImplyLeading: false,
-          title: Text('حساب کتاب'),
+          title: const Text(
+            'حساب کتاب',
+            style: TextStyle(color: Colors.white),
+          ),
           centerTitle: true,
           titleSpacing: 10.0,
           bottom: TabBar(
-            // isScrollable: true,
+            indicatorWeight: 5.0,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorColor: Color(0xFFFF5722), // Change bottom border color
+            labelColor: Color(0xFFFF5722), // Active tab text color
+            unselectedLabelColor: Colors.white, // Inactive tab text color
             tabs: <Widget>[
               Tab(
-                icon: Icon(Icons.home, size: 22.0,), 
-                // text: 'خانه',
-                child: Text('خانه', style: myTextStyle(fontSize: 14.0),),
-
+                height: 55.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.home, size: 22.0),
+                    const SizedBox(height: 5.0),
+                    Text('خانه',
+                        style:
+                            myTextStyle(fontSize: 14.0, color: Colors.white)),
+                  ],
+                ),
               ),
               Tab(
-                icon: Icon(FontAwesomeIcons.handHoldingWater, size: 22.0,),
-                // text: 'آب',
-                child: Text('آب', style: myTextStyle(fontSize: 14.0),),
+                height: 55.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(FontAwesomeIcons.handHoldingDroplet, size: 22.0),
+                    const SizedBox(height: 5.0),
+                    Text('آب',
+                        style:
+                            myTextStyle(fontSize: 14.0, color: Colors.white)),
+                  ],
+                ),
               ),
               Tab(
-                // iconMargin: EdgeInsets.only(bottom: 8.0),
-                icon: FaIcon(FontAwesomeIcons.bolt, size: 22.0,),
-                // text: 'برق',
-                child: Text('برق', style: myTextStyle(fontSize: 14.0),),
+                height: 55.0,
+                child: Column(
+                  children: [
+                    const FaIcon(FontAwesomeIcons.bolt, size: 21.0),
+                    const SizedBox(height: 5.0),
+                    Text('برق',
+                        style:
+                            myTextStyle(fontSize: 14.0, color: Colors.white)),
+                  ],
+                ),
               ),
-              
             ],
           ),
         ),
@@ -89,65 +118,76 @@ BuildContext _context;
           children: <Widget>[
             Home(),
             Water(),
-            Electricity()
+            Electricity(),
           ],
         ),
       ),
-      length: 3,
-      initialIndex: 0,
     );
   }
-  void choiceAction(String choice){
-    if(choice == Constants.settings){
+
+  void choiceAction(String choice) {
+    switch (choice) {
+      case Constants.settings:
         print('Settings');
+        break;
+      case Constants.help:
+        print('Help');
+        break;
+      case Constants.signOut:
+        _showLogoutConfirmationDialog();
+        break;
+      default:
+        print('Unknown action');
+        break;
     }
-    else if(choice == Constants.help){
-        print('Subscribe');
-    }
-    else if(choice == Constants.signOut){
-        logout(_context, _hesabKetabScaffoldGlobalKey);
-    }
+  }
+
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: _context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Log Out'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Log Out'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                logout(_context, _hesabKetabScaffoldGlobalKey);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
-class Constants{
+class Constants {
   static const String profile = 'Profile';
   static const String help = 'Help';
   static const String settings = 'Settings';
   static const String signOut = 'Log out';
 
-  static const List<Map> choices = <Map>[
-    {'value':profile, 'icon': Icons.account_circle},
-    {'value':settings, 'icon': Icons.settings},
-    {'value':help, 'icon': Icons.help},
-    {'value':signOut,'icon': Icons.logout}
+  static const List<Map<String, dynamic>> choices = <Map<String, dynamic>>[
+    {'value': profile, 'icon': Icons.account_circle},
+    {'value': settings, 'icon': Icons.settings},
+    {'value': help, 'icon': Icons.help},
+    {'value': signOut, 'icon': Icons.logout},
   ];
 }
 
-
-// appBar: AppBar(
-//         title: Text('Homepage'),
-//         actions: <Widget>[
-//           PopupMenuButton<String>(
-//             onSelected: handleClick,
-//             itemBuilder: (BuildContext context) {
-//               return {'Logout', 'Settings'}.map((String choice) {
-//                 return PopupMenuItem<String>(
-//                   value: choice,
-//                   child: Text(choice),
-//                 );
-//               }).toList();
-//             },
-//           ),
-//         ],
-//       ),
-
-
-// void handleClick(String value) {
-//     switch (value) {
-//       case 'Logout':
-//         break;
-//       case 'Settings':
-//         break;
-//     }
-// }
+// Define myTextStyle for consistency
+TextStyle myTextStyle({double fontSize = 14.0, Color color = Colors.black}) {
+  return TextStyle(
+    fontSize: fontSize,
+    color: color,
+  );
+}

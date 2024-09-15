@@ -25,3 +25,5 @@ doc/api/
 
 .flutter-plugins-dependencies
 .flutter-plugins
+
+./android/hesab_ketab_upload_key_store.jks

@@ -1,34 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:hesab_ketab/myWidgets/cost_widges.dart';
+import 'package:hesab_ketab/myWidgets/cost_widgets.dart';
 import 'package:hesab_ketab/myWidgets/date_time_picker.dart';
 import 'package:hesab_ketab/utils/database_activity.dart';
 import 'package:intl/intl.dart';
 
-class Addwatermeter extends StatefulWidget {
-  Addwatermeter({Key key}) : super(key: key);
-
+class AddWaterMeter extends StatefulWidget {
   @override
-  _AddwatermeterState createState() => _AddwatermeterState();
+  _AddWaterMeterState createState() => _AddWaterMeterState();
 }
 
-class _AddwatermeterState extends State<Addwatermeter> {
-  var height;
-  var width;
-  final GlobalKey<ScaffoldState> _addWaterScaffoldStateKey = GlobalKey<ScaffoldState>();
+class _AddWaterMeterState extends State<AddWaterMeter> {
+  late double height;
+  late double width;
+  final GlobalKey<ScaffoldState> _addWaterScaffoldStateKey =
+      GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _addWaterFromKey = GlobalKey<FormState>();
-  TextEditingController _consumerNameController = TextEditingController();
-  TextEditingController _subscriptionNoController = TextEditingController();
-  TextEditingController _meterDegreeController = TextEditingController();
-  TextEditingController _costPermeterController = TextEditingController();
-  // var date = DateFormat('y-d-M').format(DateTime.now());
-  DateTime _mySelectedDate;
-  // DateTime.now()
-  BuildContext _context;
+
+  late TextEditingController _consumerNameController;
+  late TextEditingController _subscriptionNoController;
+  late TextEditingController _meterDegreeController;
+  late TextEditingController _costPermeterController;
+
+  DateTime? _mySelectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _consumerNameController = TextEditingController();
+    _subscriptionNoController = TextEditingController();
+    _meterDegreeController = TextEditingController();
+    _costPermeterController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _consumerNameController.dispose();
+    _subscriptionNoController.dispose();
+    _meterDegreeController.dispose();
+    _costPermeterController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    _context = context;
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       key: _addWaterScaffoldStateKey,
       resizeToAvoidBottomInset: false,
@@ -39,133 +56,150 @@ class _AddwatermeterState extends State<Addwatermeter> {
       ),
       body: Material(
         child: GestureDetector(
-          onTap: ()=> FocusScope.of(context).unfocus(),
+          onTap: () => FocusScope.of(context).unfocus(),
           child: Container(
             alignment: Alignment.center,
             padding: EdgeInsets.only(
               left: height * 0.015,
-              top: height * 0.015, 
+              top: height * 0.015,
               right: height * 0.015,
-              bottom: MediaQuery.of(context).viewInsets.bottom),
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
             child: SingleChildScrollView(
-              child: Form(  
+              child: Form(
                 key: _addWaterFromKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      child: TextFormField(
-                        controller: _consumerNameController,
-                        decoration: myInputDecoration(labelText: 'اسم مشترک', helperText: 'اسم مشترک در بل'),
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                        style: myTextStyle(color: Color(0xFF212121)),
-                        // ignore: missing_return
-                        validator: (value){
-                          if(value.isEmpty){
-                            return 'اسم مشترک را وارد نمایید.';
-                          }
-                        },
-                      )
-                    ),
-                    SizedBox(height: 15.0,),
-                    Container(
-                      child: TextFormField(
-                        controller: _subscriptionNoController,
-                        decoration: myInputDecoration(labelText: 'شماره ثبت بل'),
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                        style: myTextStyle(color: Color(0xFF212121)),
-                        // ignore: missing_return
-                        validator: (value){
-                          if(value.isEmpty){
-                            return 'شماره ثبت بل را وارد نمایید.';
-                          }
-                        },
-                      )
-                    ),
-                    SizedBox(height: 15.0,),
-                    Container(
-                      child: TextFormField(
-                        controller: _meterDegreeController,
-                        decoration: myInputDecoration(labelText: 'درجه میتر', helperText: 'اخرین درجه حالیه در بل'),
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                        style: myTextStyle(color: Color(0xFF212121)),
-                        // ignore: missing_return
-                        validator: (value){
-                          if(value.isEmpty){
-                            return 'درجه بل را وارد نمایید';
-                          }
-                        },
-                      )
-                    ),
-                    SizedBox(height: 15.0,),
-                    Container(
-                      child: TextFormField(
-                        controller: _costPermeterController,
-                        decoration: myInputDecoration(labelText: 'قیمت فی متر آب'),
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                        style: myTextStyle(color: Color(0xFF212121)),
-                        // ignore: missing_return
-                        validator: (value){
-                          if(value.isEmpty){
-                            return 'قیمت فی متر اب را وارد نمایید.';
-                          }
-                        },
-                      )
-                    ),
-                    SizedBox(height: 15.0,),
-                    Container(
-                      child: MyTextFieldDatePicker(
-                      
-                        labelText: "تاریخ",
-                        prefixIcon: Icon(Icons.date_range),
-                        suffixIcon: Icon(Icons.arrow_drop_down),
-                        lastDate: DateTime.now().add(Duration(days: 366)),
-                        firstDate: DateTime.now().subtract(Duration(days: 366)),
-                        initialDate: DateTime.now().add(Duration(days: 1)),
-                        onDateChanged: (selectedDate) {
-                          // Do something with the selected date
-                          _mySelectedDate = selectedDate;
-                          print(_mySelectedDate);
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 15.0,),
-                    Container(
-                      child: RaisedButton(
-                        color: Color(0xFFFF5722),
-                        child: Text('ثبت میتر', style: myTextStyle(color: Colors.white),),
-                        onPressed: ()async{
-                          if(_addWaterFromKey.currentState.validate()){
-                            _addWaterFromKey.currentState.save();
-                            Map _dataToSend = {
-                              'consumer_name': _consumerNameController.text,
-                              'subscription_no': _subscriptionNoController.text,
-                              'meter_degree': _meterDegreeController.text,
-                              'cost_perdegree' : _costPermeterController.text,
-                              'date': _mySelectedDate != null ? _mySelectedDate.toString() : DateFormat('y-M-d').format(DateTime.now()).toString()  
-                            };
-                            print(_costPermeterController.text);
-                            await addWaterMeter(_context, _addWaterScaffoldStateKey, _dataToSend );
-                          }
+                    _buildTextField(
+                      controller: _consumerNameController,
+                      labelText: 'اسم مشترک',
+                      helperText: 'اسم مشترک در بل',
+                      keyboardType: TextInputType.text,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'اسم مشترک را وارد نمایید.';
                         }
-                      )
-                    )
-                    
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 15.0),
+                    _buildTextField(
+                      controller: _subscriptionNoController,
+                      labelText: 'شماره ثبت بل',
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'شماره ثبت بل را وارد نمایید.';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 15.0),
+                    _buildTextField(
+                      controller: _meterDegreeController,
+                      labelText: 'درجه میتر',
+                      helperText: 'اخرین درجه حالیه در بل',
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'درجه بل را وارد نمایید';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 15.0),
+                    _buildTextField(
+                      controller: _costPermeterController,
+                      labelText: 'قیمت فی متر آب',
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'قیمت فی متر آب را وارد نمایید.';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 15.0),
+                    _buildDatePicker(),
+                    SizedBox(height: 15.0),
+                    _buildSubmitButton(),
                   ],
                 ),
               ),
-            ),  
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    String? helperText,
+    required TextInputType keyboardType,
+    required String? Function(String?) validator,
+  }) {
+    return Container(
+      child: TextFormField(
+        controller: controller,
+        decoration: myInputDecoration(
+          labelText: labelText,
+          helperText: helperText,
+        ),
+        keyboardType: keyboardType,
+        textInputAction: TextInputAction.next,
+        onEditingComplete: () => FocusScope.of(context).nextFocus(),
+        style: myTextStyle(color: Color(0xFF212121)),
+        validator: validator,
+      ),
+    );
+  }
+
+  Widget _buildDatePicker() {
+    return Container(
+      child: MyTextFieldDatePicker(
+        labelText: "تاریخ",
+        prefixIcon: Icon(Icons.date_range),
+        suffixIcon: Icon(Icons.arrow_drop_down),
+        lastDate: DateTime.now().add(Duration(days: 366)),
+        firstDate: DateTime.now().subtract(Duration(days: 366)),
+        initialDate: DateTime.now().add(Duration(days: 1)),
+        onDateChanged: (selectedDate) {
+          setState(() {
+            _mySelectedDate = selectedDate;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFFF5722),
+        ),
+        child: Text('ثبت میتر', style: myTextStyle(color: Colors.white)),
+        onPressed: () async {
+          if (_addWaterFromKey.currentState!.validate()) {
+            _addWaterFromKey.currentState!.save();
+            Map<String, dynamic> _dataToSend = {
+              'consumer_name': _consumerNameController.text,
+              'subscription_no': _subscriptionNoController.text,
+              'meter_degree': _meterDegreeController.text,
+              'cost_perdegree': _costPermeterController.text,
+              'date': _mySelectedDate != null
+                  ? _mySelectedDate!.toString()
+                  : DateFormat('y-M-d').format(DateTime.now()).toString(),
+            };
+            print(_costPermeterController.text);
+            await addWaterMeter(
+                context, _addWaterScaffoldStateKey, _dataToSend);
+          }
+        },
       ),
     );
   }

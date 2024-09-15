@@ -1,336 +1,326 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:hesab_ketab/utils/api_config.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:hesab_ketab/myWidgets/cost_widges.dart';
+import 'package:hesab_ketab/myWidgets/cost_widgets.dart';
 import 'package:hesab_ketab/utils/database_activity.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SubmetersList extends StatefulWidget {
-  SubmetersList({Key key}) : super(key: key);
+  const SubmetersList({Key? key}) : super(key: key);
 
   @override
   _SubmetersListState createState() => _SubmetersListState();
 }
 
 class _SubmetersListState extends State<SubmetersList> {
-  GlobalKey<ScaffoldState> _submeterListScaffoldStateKey  = GlobalKey<ScaffoldState>();
-  Future _futureSubmeter;
-  final _apiConfig = new API_Config();
-  String _apiUrl;
-  String _access_token;
-  String _userData;
-  Map _submeterData; 
-  Map <String, String> _header; 
-  DateFormat _dateFormat = DateFormat('y-d-M');
-  BuildContext _context;
+  final GlobalKey<ScaffoldState> _submeterListScaffoldStateKey =
+      GlobalKey<ScaffoldState>();
+  late Future<List<dynamic>> _futureSubmeter;
+  final API_Config _apiConfig = API_Config();
+  final DateFormat _dateFormat = DateFormat('y-d-M');
+  late BuildContext _context;
 
-  var height;
-  var width;
-  
   @override
   void initState() {
     super.initState();
     _futureSubmeter = fetchSubmeter();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     _context = context;
-    this.height = MediaQuery.of(context).size.height;
-    this.width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       key: _submeterListScaffoldStateKey,
       appBar: AppBar(
         backgroundColor: Colors.blueGrey,
-        title: Text('میترهای فرعی'),
+        title: const Text('میترهای فرعی'),
         centerTitle: true,
       ),
-      body: Container(
+      body: Padding(
         padding: EdgeInsets.only(top: height * 0.01),
-
-        child: FutureBuilder(
+        child: FutureBuilder<List<dynamic>>(
           future: _futureSubmeter,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            // print(snapshot.data);
-            
-            if(snapshot.hasData){
-              var data = snapshot.data;
-              return Material(
-                child: Container(
-                  child: ListView.builder(
-                    itemCount: data.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      if(data[index]['error'] != null && data[index]['error'] == true  ){
-                        return  showExceptionMsg(context: this._context, message: data[index]['message']);
-                      }
+          builder:
+              (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (snapshot.hasData && snapshot.data != null) {
+              final data = snapshot.data!;
+              return ListView.builder(
+                itemCount: data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (data[index]['error'] == true) {
+                    return showExceptionMsg(
+                        context: _context, message: data[index]['message']);
+                  }
 
-                      if(data[index]['submeters'].length != 0){
-                        var submeterLen = data[index]['submeters'].length;
-                        List<TableRow> _tableRow = [];
-                        
-                        _tableRow.add(TableRow(
+                  if (data[index]['submeters'].isNotEmpty) {
+                    List<TableRow> _tableRow = [
+                      TableRow(
+                        children: [
+                          Text('نام میتر',
+                              style: myTextStyle(fontWeight: FontWeight.w600)),
+                          Text('درجه میتر',
+                              style: myTextStyle(fontWeight: FontWeight.w600)),
+                          Text('تاریخ ثبت',
+                              style: myTextStyle(fontWeight: FontWeight.w600)),
+                          Text('',
+                              style: myTextStyle(fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ];
+
+                    for (var submeter in data[index]['submeters']) {
+                      final formattedDate =
+                          _dateFormat.format(DateTime.parse(submeter['date']));
+                      _tableRow.add(
+                        TableRow(
                           children: [
-                            Text('نام میتر', style: myTextStyle( fontWeight: FontWeight.w600),),
-                            Text('درجه میتر', style: myTextStyle( fontWeight: FontWeight.w600)),
-                            Text('تاریخ ثبت', style: myTextStyle( fontWeight: FontWeight.w600)),
-                            Text('', style: myTextStyle( fontWeight: FontWeight.w600)),
-                          ]
-                        ));
-                        for(int i=0; i < submeterLen; i++){
-                        var formatedDate = _dateFormat.format(DateTime.parse(data[index]['submeters'][i]['date']));
-                          
-                          _tableRow.add(TableRow(
-                            
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  '${data[index]['submeters'][i]['submeter_consumer']}',
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  '${data[index]['submeters'][i]['meter_degree']}'
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  '$formatedDate'
-                                ),
-                              ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text('${submeter['submeter_consumer']}'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text('${submeter['meter_degree']}'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(formattedDate),
+                            ),
+                            IconButton(
+                              icon: const Icon(FontAwesomeIcons.times),
+                              color: Colors.red,
+                              splashRadius: 15.0,
+                              visualDensity:
+                                  VisualDensity(vertical: -4, horizontal: 0),
+                              iconSize: 16,
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                myDelete(
+                                    context: _context, meterID: submeter['id']);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                              IconButton(
-                                icon: Icon(FontAwesomeIcons.times),
-                                color: Colors.red,
-                                splashRadius: 15.0,
-                                visualDensity: VisualDensity(vertical: -4, horizontal: 0),
-                                iconSize: 16, padding: EdgeInsets.all(0.0),
-                                onPressed: (){
-                                  print(data[index]['submeters'][i]['id']);
-                                  myDelete( context: _context, meterID: data[index]['submeters'][i]['id']);
-                                }),
-                              
-                            ]
-                          ));
-                        }
-                        return Material(
-                          child: Column(
-                            children: [
-                              Ink(
-                                width: width,
-                                padding: EdgeInsets.all( height * 0.012),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFF0F0F0),
-                                  boxShadow: boxShadow(),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'میتر عمومی: ',
-                                            style: myTextStyle(fontSize: 16, fontWeight: FontWeight.w700 ),
-                                          ),
-                                          Text(
-                                            '${data[index]['consumer_name']} - ${data[index]['no_of_submeters']}',
-                                            style: myTextStyle(fontSize: 16, fontWeight: FontWeight.w500 ),
-                                          ),
-                                        ],
-                                      ),
-                                      
-                                      Container(
-                                        padding: EdgeInsets.only(top: 8.0),
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              width: width,
-                                              color: Colors.grey[300],
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Text('میترهای فرعی',
-                                                style: myTextStyle(fontSize: 14, fontWeight: FontWeight.w500 )
-                                              ),
-                                            ),
-                                            Table(
-                                              // columnWidths: {1: FlexColumnWidth(3.0) },
-                                              children: _tableRow,
-                                              
-                                            ),
-                                          ],
-                                        )
-                                      ),
-                                        
-                                    ],
-                                  ),
-                                )
-                              ),
-                              Divider(thickness: 3.0,),
-                              SizedBox(height: height * 0.012)
-                            ],
-                          ),
-                        );
-
-                      }else{
-
-                        return Material(
-                          child: Column(
-                            children: [
-                              Container(
-                                width: width,
-                                padding: EdgeInsets.all( height * 0.012),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFF0F0F0),
-                                  boxShadow: boxShadow(),
-                                ),
-                                child: 
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                    return Material(
+                      child: Column(
+                        children: [
+                          Ink(
+                            width: width,
+                            padding: EdgeInsets.all(height * 0.012),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0F0F0),
+                              boxShadow: boxShadow(),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
                                       Text(
-                                        '${data[index]['consumer_name']} - ${data[index]['meter_no']}',
-                                        style: myTextStyle( fontSize: 16.0,fontWeight: FontWeight.w500),
+                                        'میتر عمومی: ',
+                                        style: myTextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700),
                                       ),
-                                      Center(
-                                        child: Text(
-                                          'میتر فرعی ندارد',
-                                          style: myTextStyle( color: Color(0xFFFF5622),fontWeight: FontWeight.normal),
-                                        ),
+                                      Text(
+                                        '${data[index]['consumer_name']} - ${data[index]['no_of_submeters']}',
+                                        style: myTextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500),
                                       ),
                                     ],
                                   ),
-                                )
+                                  Container(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: width,
+                                          color: Colors.grey[300],
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            'میترهای فرعی',
+                                            style: myTextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                        ),
+                                        Table(
+                                          children: _tableRow,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Divider(thickness: 3.0,),
-                              SizedBox(height: height * 0.012)
-                            ],
+                            ),
                           ),
-                        );
-
-                      }
-                   },
-                  ),
-                ),
+                          const Divider(thickness: 3.0),
+                          SizedBox(height: height * 0.012),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Material(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: width,
+                            padding: EdgeInsets.all(height * 0.012),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0F0F0),
+                              boxShadow: boxShadow(),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${data[index]['consumer_name']} - ${data[index]['meter_no']}',
+                                    style: myTextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  Center(
+                                    child: Text(
+                                      'میتر فرعی ندارد',
+                                      style: myTextStyle(
+                                          color: const Color(0xFFFF5622)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const Divider(thickness: 3.0),
+                          SizedBox(height: height * 0.012),
+                        ],
+                      ),
+                    );
+                  }
+                },
               );
-            }else if(snapshot.hasError){
-              return Text('${snapshot.hasError}');
+            } else {
+              return const Center(child: Text('No data available'));
             }
-            return Center(child: CircularProgressIndicator(),);
-
           },
         ),
       ),
     );
   }
 
-  
-
-deleteSubmeter(int meterID) async{
+  Future<void> deleteSubmeter(int meterID) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    this._apiUrl = this._apiConfig.apiUrl('deleteSubmeter');
-    this._userData = prefs.getString('user');
-    this._submeterData ={
-      'user' : _userData,
-      'id' : meterID.toString(),
-    };
-    this._access_token = prefs.getString('access_token');
-    this._header = {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                  "Accept": 'application/json',
-                  'Authorization': this._access_token,};
-    // print(_mainMeterData);
-    
-    
+    final String? _userData = prefs.getString('user');
+    final String? _accessToken = prefs.getString('accessToken');
 
-    try{
-      var response = await http.post(
-        Uri.parse(this._apiUrl),
-        body: _submeterData, 
-        headers: _header,
-      );
-      if(response.statusCode == 201){
-        Map data = json.decode(response.body);
-        return createSnackBar(data['message'], _context, _submeterListScaffoldStateKey, color: Colors.cyan);
-      }else if (response.statusCode == 422){
-        Map data = json.decode(response.body);
-        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
-      }else if(response.statusCode == 400){
-
-        Map data = json.decode(response.body);
-        throw('Message: ${data['message']}');
-      }else if(response.statusCode == 500){
-
-        Map data = json.decode(response.body);
-        throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
-      }else{
-        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
-      }
-    }catch(e){
-      return createSnackBar('$e', _context, _submeterListScaffoldStateKey, color: Colors.red);
+    if (_userData == null || _accessToken == null) {
+      return;
     }
-    
 
+    final Map<String, String> _header = {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept": 'application/json',
+      'Authorization': _accessToken,
+    };
+
+    final Map<String, String> _submeterData = {
+      'user': _userData,
+      'id': meterID.toString(),
+    };
+
+    final response = await http.post(
+      Uri.parse(_apiConfig.apiUrl('deleteSubmeter')),
+      body: _submeterData,
+      headers: _header,
+    );
+
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      createSnackBar(data['message'], _context, _submeterListScaffoldStateKey,
+          color: Colors.cyan);
+    } else {
+      String message = 'Unknown Error';
+      try {
+        final Map<String, dynamic> data = json.decode(response.body);
+        message = data['message'] ?? message;
+      } catch (_) {}
+      createSnackBar('Message: $message Status Code: ${response.statusCode}',
+          _context, _submeterListScaffoldStateKey,
+          color: Colors.red);
+    }
   }
 
-  myDelete({BuildContext context, meterID}){
-    return showDialog(
+  void myDelete({required BuildContext context, required int meterID}) {
+    showDialog(
       context: context,
-      builder: (BuildContext context){ 
+      builder: (BuildContext context) {
         return AlertDialog(
-        actionsPadding: EdgeInsets.all(20) ,
-        elevation: 10.0,
-        titleTextStyle:  myTextStyle(color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold,),
-        // title: Text('حذف میتر عمومی!'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              Icon(FontAwesomeIcons.exclamationTriangle, size: 70, color: Colors.amberAccent,),
-              SizedBox(height: 20.0,),
-              Text('میتر فرعی خذف شود؟', style: myTextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold,)),
-              SizedBox(height: 40.0,),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  RaisedButton(
-                    color: Colors.red,
-                    child: Text('حذف', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
-                    onPressed: (){
-                      setState(() {
-                        deleteSubmeter(meterID);
-                        _futureSubmeter = fetchSubmeter();
-                        Navigator.of(context, rootNavigator: true).pop();
-                      });
-                    }
-                  ),
-                  // SizedBox(width: 25,),
-                  RaisedButton(
-                    color: Color(0xff00BCD4),
-                    child: Text('لغو', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
-                    onPressed: (){
-                      Navigator.of(context, rootNavigator: true).pop();
-                    }
-                  )
-                ],
-              )
-            ],
+          actionsPadding: const EdgeInsets.all(20),
+          elevation: 10.0,
+          titleTextStyle: myTextStyle(
+              color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Icon(FontAwesomeIcons.triangleExclamation,
+                    size: 70, color: Colors.amberAccent),
+                const SizedBox(height: 20.0),
+                Text('میتر فرعی خذف شود؟',
+                    style: myTextStyle(
+                        color: Colors.red,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(height: 40.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      child: Text('خیر',
+                          style: myTextStyle(
+                              color: Colors.white,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green),
+                      child: Text('بلی',
+                          style: myTextStyle(
+                              color: Colors.white,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold)),
+                      onPressed: () async {
+                        await deleteSubmeter(meterID);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-      }
+        );
+      },
     );
   }
-
-
-
 }

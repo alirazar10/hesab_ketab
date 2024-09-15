@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:hesab_ketab/myWidgets/cost_widges.dart';
+import 'package:hesab_ketab/myWidgets/cost_widgets.dart';
 import 'package:hesab_ketab/myWidgets/date_time_picker.dart';
 import 'package:hesab_ketab/utils/api_config.dart';
 import 'package:hesab_ketab/utils/database_activity.dart';
@@ -10,42 +10,45 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainMeterList extends StatefulWidget {
-  MainMeterList({Key key}) : super(key: key);
+  MainMeterList({Key? key}) : super(key: key);
 
   @override
   _MainMeterListState createState() => _MainMeterListState();
 }
 
 class _MainMeterListState extends State<MainMeterList> {
-  Future futureMainmeter;
+  Future<List<dynamic>>? futureMainmeter;
   final GlobalKey<FormState> _editMainMeterFormKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _mainMeterListScaffoldStateKey = GlobalKey<ScaffoldState>();
-  BuildContext _context;
-  final _apiConfig = new API_Config();
-  final _consumerNameTextEditController = TextEditingController(); 
-  final _consumerIDTextEditController = TextEditingController(); 
-  final _meterIDTextEditController = TextEditingController(); 
-  final _submeterNoTextEditController = TextEditingController(); 
-  DateTime _mySelectedDate;
+  final GlobalKey<ScaffoldState> _mainMeterListScaffoldStateKey =
+      GlobalKey<ScaffoldState>();
+  late BuildContext _context;
+  final _apiConfig = API_Config();
+  final _consumerNameTextEditController = TextEditingController();
+  final _consumerIDTextEditController = TextEditingController();
+  final _meterIDTextEditController = TextEditingController();
+  final _submeterNoTextEditController = TextEditingController();
+  DateTime? _mySelectedDate;
 
-  String _apiUrl;
-  String _access_token;
-  String _userData;
-  Map _mainMeterData = new Map(); 
-  Map <String, String> _header;
+  String? _apiUrl;
+  String? _accessToken;
+  String? _userData;
+  Map<String, dynamic> _mainMeterData = {};
+  Map<String, String>? _header;
 
-  var height;
-  var width;
+  late double height;
+  late double width;
+
   @override
   void initState() {
     super.initState();
     futureMainmeter = fetchMainMeters();
   }
+
   @override
   Widget build(BuildContext context) {
-    this._context = context;
-    this.height = MediaQuery.of(context).size.height;
-    this.width = MediaQuery.of(context).size.width;
+    _context = context;
+    height = MediaQuery.of(context).size.height;
+    width = MediaQuery.of(context).size.width;
     return Scaffold(
       key: _mainMeterListScaffoldStateKey,
       appBar: AppBar(
@@ -54,527 +57,420 @@ class _MainMeterListState extends State<MainMeterList> {
         centerTitle: true,
       ),
       body: Container(
-        padding: EdgeInsets.only(top:height * .01),
-        child: FutureBuilder(
+        padding: EdgeInsets.only(top: height * .01),
+        child: FutureBuilder<List<dynamic>>(
           future: futureMainmeter,
-          // initialData: InitialData,
-          builder: ( context,  snapshot) {
-            if (snapshot.hasData) {
-            return snapshot.data.length != 0 ? ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext context, int index) {
-              var data = snapshot.data;
-              if(data[index]['error'] != null && data[index]['error'] == true  ){
-                return  showExceptionMsg(context: this._context, message: data[index]['message']);
-              }
-              var status = snapshot.data[index]['status'];
-              return Material(
-                // elevation: 10.0,
-                child: Column(
-                  children: [
-                      Container(
-                      child: Ink(
-                        width: width,
-                        padding: EdgeInsets.all(height * 0.012),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF0F0F0),
-                          boxShadow: boxShadow(),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              
-                              children: [
-                                Container(
-                                  width: width / 1.4,
-                                    padding: const EdgeInsets.only(right: 10.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-
-                                        children: [
-                                          Text('${snapshot.data[index]['consumer_name']}', style: myTextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),),
-                                          SizedBox(width: 10.0,),
-                                          status == 1 ? Icon(FontAwesomeIcons.check, color: Color(0xff00BCD4), size: 16,) : SizedBox(width: 2.0,),
-                                        ],
-                                      ),
-                                      Row( 
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text( 'نمبر اشتراک: ',
-                                          style: myTextStyle(  fontSize: 14.0, ),),
-                                          Text( snapshot.data[index]['subscription_no'],
-                                          ),
-                                        ],
-                                      ),
-                                    
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text( 'نمبر میتر: ',style: myTextStyle(  fontSize: 14.0, ),),
-                                          Text(snapshot.data[index]['meter_no']),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text( 'تعداد میتر های فرعی:', style: myTextStyle(  fontSize: 14.0, ),),
-                                          Text('${snapshot.data[index]['no_of_submeters']}'),
-                                        ],
-                                      ),
-                                      // Divider(),
-                                      
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  // color: Colors.red,
-                                  height: 100.0,
-                                  child :VerticalDivider(thickness: 2.0, indent: 30.0,),
-                                ),
-                                Container(
-                                  padding:  EdgeInsets.only(top: height * .02, right: 15.0),
-                                  // margin:  EdgeInsets.only(top: height * .028, ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(FontAwesomeIcons.edit),
-                                        color: Color(0xff00BCD4),
-                                        iconSize: 18.0,
-                                        onPressed: (){
-                                          myEditAlertBox(
-                                            context: _context,
-                                            consumerName: snapshot.data[index]['consumer_name'],
-                                            subscNo: snapshot.data[index]['subscription_no'],
-                                            meterNo : snapshot.data[index]['meter_no'],
-                                            noOfMeter: snapshot.data[index]['no_of_submeters'],
-                                            meterID: snapshot.data[index]['id'],
-                                            date: snapshot.data[index]['date'],
-                                          );
-                                        },
-                                      ),
-                                      
-                                      IconButton(
-                                        color: Colors.red,
-                                        icon: Icon(FontAwesomeIcons.times, size: 18.0,),
-                                        onPressed: (){
-                                          myDelete(context: _context, meterID: snapshot.data[index]['id']);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: height * 0.012),
-                            Divider(),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Text('', style: myTextStyle(color: Colors.grey[600], fontSize: 12.0),),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                      Text('وضعیت میتر: ', style: myTextStyle(color: Colors.grey[600], fontSize: 12.0)),
-                                      status == 1 ? 
-                                      Text('فعال', style: myTextStyle(color: Color(0x9100BBD4))) : 
-                                      Text('غیر فعال', style: myTextStyle(color: Color(0x91FF5622))),
-                                    ],),
-                                    
-                                    Text( 'تاریخ ثبت: ${snapshot.data[index]['date']}', style: myTextStyle(color: Colors.grey[600], fontSize: 12.0)),
-                                    
-                                  ],
-                                ),
-                                OutlineButton(
-                                  color: Color(0xFFFF5622),
-                                  onPressed: (){
-                                    var st = status == 1 ? 0 : 1;
-                                    
-                                    setState(() {
-                                      changeMainMeterStatus( _context, _mainMeterListScaffoldStateKey ,snapshot.data[index]['id'], st);
-                                      futureMainmeter = fetchMainMeters();
-                                    });
-                                  },
-                                  child: Text('تغیر وضعیت', style: myTextStyle(color: Color(0xff00BCD4), fontSize: 12.0),)
-                                ) 
-                              ],
-                            )
-                          ],
-                        )
-                      ),
-                    ),
-                    Divider(thickness: 3.0,),
-                    SizedBox(height: height * 0.012)
-                  ],
-                  
-                ),
-              );
-             },
-            ) : Container(
-              padding: EdgeInsets.all(height * 0.03),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                boxShadow: boxShadow(),
-                color: Color(0xFFE9EAEB),
-              ),
-              child: Row(
-                children: [
-                  Icon( FontAwesomeIcons.exclamationTriangle, color: Color(0xFFFF5622),),
-                  SizedBox(width: 10.0,),
-                  Text(' میتری ثبت نشده. ',
-                  style: myTextStyle(color: Color(0xff00BCD4), fontSize: 20.0, fontWeight: FontWeight.bold),),
-                ],
-              )
-                );
-              
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
+              return Center(child: Text("Error: ${snapshot.error}"));
+            } else if (snapshot.hasData) {
+              if (snapshot.data!.isEmpty) {
+                return _buildNoDataWidget();
+              }
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (BuildContext context, int index) {
+                  var data = snapshot.data![index];
+                  if (data['error'] != null && data['error'] == true) {
+                    return showExceptionMsg(
+                        context: _context, message: data['message']);
+                  }
+                  var status = data['status'];
+                  return _buildListItem(data, status);
+                },
+              );
             }
-            // By default, show a loading spinner.
-            return Center(child: CircularProgressIndicator(),);
+            return Container();
           },
         ),
       ),
     );
   }
 
-  editMainMeter(int meterID) async{
+  Widget _buildNoDataWidget() {
+    return Container(
+      padding: EdgeInsets.all(height * 0.03),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        boxShadow: boxShadow(),
+        color: Color(0xFFE9EAEB),
+      ),
+      child: Row(
+        children: [
+          Icon(FontAwesomeIcons.exclamationTriangle, color: Color(0xFFFF5622)),
+          SizedBox(width: 10.0),
+          Text('میتری ثبت نشده.',
+              style: myTextStyle(
+                  color: Color(0xff00BCD4),
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListItem(Map<String, dynamic> data, int status) {
+    return Material(
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(height * 0.012),
+            decoration: BoxDecoration(
+              color: Color(0xFFF0F0F0),
+              boxShadow: boxShadow(),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: width / 1.4,
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Row(
+                            children: [
+                              Text('${data['consumer_name']}',
+                                  style: myTextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(width: 10.0),
+                              if (status == 1)
+                                Icon(FontAwesomeIcons.check,
+                                    color: Color(0xff00BCD4), size: 16),
+                            ],
+                          ),
+                          _buildDetailRow(
+                              'نمبر اشتراک:', data['subscription_no']),
+                          _buildDetailRow('نمبر میتر:', data['meter_no']),
+                          _buildDetailRow('تعداد میتر های فرعی:',
+                              '${data['no_of_submeters']}'),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      height: 100.0,
+                      child: VerticalDivider(thickness: 2.0, indent: 30.0),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: height * .02, right: 15.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          IconButton(
+                            icon: Icon(FontAwesomeIcons.edit),
+                            color: Color(0xff00BCD4),
+                            iconSize: 18.0,
+                            onPressed: () {
+                              myEditAlertBox(
+                                context: _context,
+                                consumerName: data['consumer_name'],
+                                subscNo: data['subscription_no'],
+                                meterNo: data['meter_no'],
+                                noOfMeter: data['no_of_submeters'],
+                                meterID: data['id'],
+                                date: data['date'],
+                              );
+                            },
+                          ),
+                          IconButton(
+                            color: Colors.red,
+                            icon: Icon(FontAwesomeIcons.times, size: 18.0),
+                            onPressed: () {
+                              myDelete(context: _context, meterID: data['id']);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: height * 0.012),
+                Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text('وضعیت میتر: ',
+                                style: myTextStyle(
+                                    color: Colors.grey[600], fontSize: 12.0)),
+                            Text(status == 1 ? 'فعال' : 'غیر فعال',
+                                style: myTextStyle(
+                                    color: status == 1
+                                        ? Color(0x9100BBD4)
+                                        : Color(0x91FF5622))),
+                          ],
+                        ),
+                        Text('تاریخ ثبت: ${data['date']}',
+                            style: myTextStyle(
+                                color: Colors.grey[600], fontSize: 12.0)),
+                      ],
+                    ),
+                    OutlinedButton(
+                      onPressed: () {
+                        var st = status == 1 ? 0 : 1;
+                        setState(() {
+                          changeMainMeterStatus(_context,
+                              _mainMeterListScaffoldStateKey, data['id'], st);
+                          futureMainmeter = fetchMainMeters();
+                        });
+                      },
+                      child: Text('تغیر وضعیت',
+                          style: myTextStyle(
+                              color: Color(0xff00BCD4), fontSize: 12.0)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Divider(thickness: 3.0),
+          SizedBox(height: height * 0.012),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: myTextStyle(fontSize: 14.0)),
+        Text(value),
+      ],
+    );
+  }
+
+  Future<void> editMainMeter(int meterID) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    this._apiUrl = this._apiConfig.apiUrl('editMainMeter');
-    String _userData = prefs.getString('user');
-    this._mainMeterData ={
-      'consumer_name' : _consumerNameTextEditController.text, 
-      'subscription_no' : _consumerIDTextEditController.text, 
-      'meter_no' : _meterIDTextEditController.text,
-      'no_of_submeters' : _submeterNoTextEditController.text,
-      'user' : _userData,
-      'date' : _mySelectedDate.toString(),
-      'id' : meterID.toString(),
+    _apiUrl = _apiConfig.apiUrl('editMainMeter');
+    String? userData = prefs.getString('user');
+    _mainMeterData = {
+      'consumer_name': _consumerNameTextEditController.text,
+      'subscription_no': _consumerIDTextEditController.text,
+      'meter_no': _meterIDTextEditController.text,
+      'no_of_submeters': _submeterNoTextEditController.text,
+      'date': _mySelectedDate?.toIso8601String(),
     };
-    print(meterID);
-    this._access_token = prefs.getString('access_token');
-    this._header = {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                  "Accept": 'application/json',
-                  'Authorization': _access_token,};
-    // print(_mainMeterData);
-    var response = await http.post(
-      Uri.parse(this._apiUrl),
-      body: _mainMeterData, 
+    _accessToken = userData != null ? json.decode(userData)['accessToken'] : '';
+
+    _header = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $_accessToken',
+    };
+
+    var response = await http.put(
+      Uri.parse("$_apiUrl/$meterID"),
+      headers: _header,
+      body: jsonEncode(_mainMeterData),
+    );
+
+    if (response.statusCode == 200) {
+      if (json.decode(response.body)['success'] == true) {
+        Navigator.pop(_context);
+        showSnackBar(
+            context: _context,
+            message: 'موفقانه تغییر کرد',
+            color: Colors.green);
+        setState(() {
+          futureMainmeter = fetchMainMeters();
+        });
+      } else {
+        showSnackBar(
+            context: _context, message: 'خطا در ویرایش', color: Colors.red);
+      }
+    } else {
+      showSnackBar(
+          context: _context, message: 'خطا در ویرایش', color: Colors.red);
+    }
+  }
+
+  Future<void> deleteMainMeter(int meterID) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    _apiUrl = _apiConfig.apiUrl('deleteMainMeter');
+    String? userData = prefs.getString('user');
+    _accessToken = userData != null ? json.decode(userData)['accessToken'] : '';
+
+    _header = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $_accessToken',
+    };
+
+    var response = await http.delete(
+      Uri.parse("$_apiUrl/$meterID"),
       headers: _header,
     );
-    if(response.statusCode == 201){
-      Map data = json.decode(response.body);
-      print(data);
-      
-      return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey);
-    }else{
-      Map data = json.decode(response.body);
-      return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey);
 
-    }
-    try {
-      var response = await http.post(
-        Uri.parse(this._apiUrl),
-        body: _mainMeterData, 
-        headers: _header,
-      );
-
-      if(response.statusCode == 201){
-        Map data = json.decode(response.body);
-        return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey, color: Colors.cyan);
-      }else if(response.statusCode == 400) {
-        Map data  = json.decode(response.body);
-        throw('Message ${data['message']} \n Status Code:  ${response.statusCode}');
-      }else if (response.statusCode == 422){
-        Map data = json.decode(response.body);
-        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
-      }else if(response.statusCode == 500){
-
-        Map data = json.decode(response.body);
-        throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
-      }else{
-        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
+    if (response.statusCode == 200) {
+      if (json.decode(response.body)['success'] == true) {
+        showSnackBar(
+            context: _context, message: 'موفقانه حذف شد', color: Colors.green);
+        setState(() {
+          futureMainmeter = fetchMainMeters();
+        });
+      } else {
+        showSnackBar(
+            context: _context, message: 'خطا در حذف', color: Colors.red);
       }
-    } catch (e) {
-      return createSnackBar('$e', _context, _mainMeterListScaffoldStateKey, color: Colors.red);
+    } else {
+      showSnackBar(context: _context, message: 'خطا در حذف', color: Colors.red);
     }
   }
-  myEditAlertBox({BuildContext context, String consumerName, String subscNo, String meterNo, int noOfMeter, int meterID, String date} ){
-    
-    return showDialog(
-      // barrierDismissible:false,
-      context: context,
-      builder: (BuildContext context){
-        return AlertDialog(
-        title: Text('ویرایش میتر عمومی', style: myTextStyle(fontSize: 16.0),),
-        content: SingleChildScrollView(
-          child:Column(
-            children: [
-              Form(
-                  key: _editMainMeterFormKey,
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.only(top: height * 0.015),
-                        child: TextFormField(
-                          controller: _consumerNameTextEditController..text = consumerName,
-                          style: myTextStyle(color: Color(0xFF212121)),
-                          decoration: myInputDecoration(labelText:'اسم مشترک'),
-                          textInputAction: TextInputAction.next,
-                          onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                          // ignore: missing_return
-                          validator: (String value){
-                            if(value.isEmpty){
-                              return 'اسم مشترک را وارد نمایید.';
-                            }
-                          },
-                        )
-                      ),
-                      SizedBox(height: height * 0.015,),
-                      Container(
-                        child: TextFormField(
-                          controller: _consumerIDTextEditController..text = subscNo,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.next,
-                          onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                          style: myTextStyle(color: Color(0xFF212121)),
-                          decoration: myInputDecoration(labelText:'نمبر اشتراک'),
-                          // ignore: missing_return
-                          validator: (String value){
-                            if(value.isEmpty){
-                              return 'نمبر اشتراک را وارد نمایید.';
-                            }
-                            /**
-                             * @TODO 
-                             * belo is incorrect
-                             */
-                            // if(_consumerIDTextEditController.text.runtimeType != int){
-                            //   return 'نمبر اشتراک باید شماره باشد.';
-                            // }
-                          },
-                        )
-                      ),
-                      SizedBox(height: height * 0.015,),
-                      Container(
-                        child: TextFormField(
-                          controller: _meterIDTextEditController..text = meterNo,
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.next,
-                          onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                          style: myTextStyle(color: Color(0xFF212121)),
-                          decoration: myInputDecoration(labelText:'نمبر میتر'),
-                          // ignore: missing_return
-                          validator: (String value){
-                            if(value.isEmpty){
-                              return 'نمبر میتر را وارد نمایید.';
-                            }
-                          },
-                        )
-                      ),
-                      SizedBox(height: height * 0.012,),
-                      Container(
-                        padding: EdgeInsets.only(),
-                        child: TextFormField(
-                          controller: _submeterNoTextEditController..text = noOfMeter.toString(),
-                          keyboardType: TextInputType.number,
-                          textInputAction: TextInputAction.done,
-                          onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                          style: myTextStyle(color: Color(0xFF212121)),
-                          decoration: myInputDecoration(labelText:'تعداد میترهای فرعی'),
-                          // ignore: missing_return
-                          validator: (String value){
-                            if(value.isEmpty)
-                              return 'تعداد میترهای فرعی را وارد نمایید.';
-                          },
-                        )
-                      ),
-                      SizedBox(height: height * 0.012,),
-                    
-                      MyTextFieldDatePicker(
-                        
-                        labelText: "تاریخ ثبت",
-                        prefixIcon: Icon(Icons.date_range),
-                        suffixIcon: Icon(Icons.arrow_drop_down),
-                        lastDate: DateTime.now().add(Duration(days: 366)),
-                        firstDate: DateTime.now().subtract(Duration(days: 366)),
-                        initialDate: DateTime.now().add(Duration(days: 1)),
-                        userDate: DateTime.parse(date),
-                        onDateChanged: (selectedDate) {
-                          // Do something with the selected date
-                          _mySelectedDate = selectedDate;
-                        },
-                      ),
-                      SizedBox(height: height * 0.012,),
-                      Container(
-                        width: width,
-                        padding: EdgeInsets.only(top: height * 0.015),
-                        child: RaisedButton(
-                          padding: EdgeInsets.all(10.0),
-                          color: Color(0xFFFF5722),
-                          child: Text('ویرایش میتر' , style: myTextStyle(color: Colors.white),),
-                          onPressed: () {
-                            if(_editMainMeterFormKey.currentState.validate()){
-                              _editMainMeterFormKey.currentState.save();
-                              editMainMeter(meterID);
-                              setState(() {
-                                futureMainmeter = fetchMainMeters();
-                                Navigator.of(context, rootNavigator: true).pop();
-                              });
-                            }
-                          },
-                        )
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          )
-        ),
-      );
-      }
-    );
-  }
-  deleteMainMeter(int meterID) async{
+
+  Future<List<dynamic>> fetchMainMeters() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    this._apiUrl = this._apiConfig.apiUrl('deleteMainMeter');
-    String _userData = prefs.getString('user');
-    this._mainMeterData ={
-      'user' : _userData,
-      'id' : meterID.toString(),
+    _apiUrl = _apiConfig.apiUrl('fetchMainMeters');
+    String? userData = prefs.getString('user');
+    _accessToken = userData != null ? json.decode(userData)['accessToken'] : '';
+
+    _header = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $_accessToken',
     };
-    this._access_token = prefs.getString('access_token');
-    this._header = {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                  "Accept": 'application/json',
-                  'Authorization': _access_token,};
-    // print(_mainMeterData);
-    try{
-      var response = await http.post(
-        Uri.parse(this._apiUrl),
-        body: _mainMeterData, 
-        headers: _header,
-      );
-      if(response.statusCode == 201){
-        Map data = json.decode(response.body);
-        return createSnackBar(data['message'], _context, _mainMeterListScaffoldStateKey, color: Colors.cyan);
-      }else if (response.statusCode == 422){
-        Map data = json.decode(response.body);
-        throw('Message: ${data['errors']} With Status Code:  ${response.statusCode}');
-      }else if(response.statusCode == 400){
 
-        Map data = json.decode(response.body);
-        throw('Message: ${data['message']}');
-      }else if(response.statusCode == 500){
+    var response = await http.get(
+      Uri.parse(_apiUrl!),
+      headers: _header,
+    );
 
-        Map data = json.decode(response.body);
-        throw('Message: Internal Server Error With Status Code:  ${response.statusCode}');
-      }else{
-        throw('Message: Unkown Error Status Code:  ${response.statusCode}');
-      }
-    }catch(e){
-      return createSnackBar('$e', _context, _mainMeterListScaffoldStateKey, color: Colors.red);
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load main meters');
     }
   }
 
-  myDelete({BuildContext context, meterID}){
-    return showDialog(
-      context: context,
-      builder: (BuildContext context){
-        return  AlertDialog(
-        actionsPadding: EdgeInsets.all(20) ,
-        elevation: 10.0,
-        titleTextStyle:  myTextStyle(color: Colors.red, fontSize: 24.0, fontWeight: FontWeight.bold,),
-        // title: Text('حذف میتر عمومی!'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              Icon(FontAwesomeIcons.exclamationTriangle, size: 70, color: Colors.amberAccent,),
-              SizedBox(height: 20.0,),
-              Text('میتر عمومی خذف شود؟', style: myTextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold,)),
-              SizedBox(height: 40.0,),
+  Future<void> myEditAlertBox({
+    required BuildContext context,
+    required String consumerName,
+    required String subscNo,
+    required String meterNo,
+    required String noOfMeter,
+    required int meterID,
+    required String date,
+  }) {
+    _consumerNameTextEditController.text = consumerName;
+    _consumerIDTextEditController.text = subscNo;
+    _meterIDTextEditController.text = meterNo;
+    _submeterNoTextEditController.text = noOfMeter;
+    _mySelectedDate = DateTime.parse(date);
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('ویرایش میتر عمومی'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _editMainMeterFormKey,
+              child: Column(
                 children: [
-                  RaisedButton(
-                    color: Colors.red,
-                    child: Text('حذف', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
-                    onPressed: (){
-                      deleteMainMeter(meterID);
-                      setState(() {
-                        futureMainmeter = fetchMainMeters();
-                        Navigator.of(context, rootNavigator: true).pop();
-                      });
-                    }
+                  _buildTextField(
+                      'نام مصرف کننده', _consumerNameTextEditController),
+                  _buildTextField('نمبر اشتراک', _consumerIDTextEditController),
+                  _buildTextField('نمبر میتر', _meterIDTextEditController),
+                  _buildTextField(
+                      'تعداد میتر های فرعی', _submeterNoTextEditController),
+                  MyTextFieldDatePicker(
+                    labelText: "تاریخ ثبت",
+                    prefixIcon: Icon(Icons.date_range),
+                    suffixIcon: Icon(Icons.arrow_drop_down),
+                    lastDate: DateTime.now().add(Duration(days: 366)),
+                    firstDate: DateTime.now().subtract(Duration(days: 366)),
+                    initialDate: DateTime.now().add(Duration(days: 1)),
+                    userDate: DateTime.parse(date),
+                    onDateChanged: (selectedDate) {
+                      // Do something with the selected date
+                      _mySelectedDate = selectedDate;
+                    },
                   ),
-                  // SizedBox(width: 25,),
-                  RaisedButton(
-                    color: Color(0xff00BCD4),
-                    child: Text('لغو', style: myTextStyle(color: Colors.white, fontSize: 16.0,)),
-                    onPressed: (){
-                      Navigator.of(context, rootNavigator: true).pop();
-                    }
-                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
-        ),
-        
-      );
-      }
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('بستن'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_editMainMeterFormKey.currentState?.validate() ?? false) {
+                  editMainMeter(meterID);
+                }
+              },
+              child: Text('ذخیره'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(labelText: label),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'لطفا این فیلد را پر کنید';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Future<void> myDelete({required BuildContext context, required int meterID}) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('حذف میتر'),
+          content: Text('آیا مطمئن هستید که می‌خواهید این میتر را حذف کنید؟'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('بستن'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                deleteMainMeter(meterID);
+                Navigator.of(context).pop();
+              },
+              child: Text('حذف'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showSnackBar(
+      {required BuildContext context,
+      required String message,
+      required Color color}) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: color,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
-
-
-
-
-
-
-
-// class Mainmeter{
-//   // ignore: non_constant_identifier_names 
-//   final String consumer_name;
-//   final String subscription_no;
-//   final String meter_no;
-//   final int no_of_submeters;
-//   final int status;
-//   final int id;
-//   final int user_id;
-
-//   Mainmeter({
-//     this.consumer_name,
-//     this.subscription_no,
-//     this.meter_no,
-//     this.no_of_submeters, this.status,
-//     this.id,
-//     this.user_id,
-//     });
-
-//   factory Mainmeter.fromJson(Map <String, dynamic> json){
-//     print('${json['id']} : ${json['consumer_name']} : ${json['meter_no']}');
-    
-//     var data =  Mainmeter(
-//       consumer_name: json['consumer_name'],
-//       subscription_no: json['subscription_no'],
-//       meter_no: json['meter_no'],
-//       no_of_submeters: json['no_of_submeters'],
-//       status: json['status'],
-//       id: json['id'],
-//       user_id: json['user_id'],
-//     );
-//     // print(data);
-//     return data; 
-//   }
-// }

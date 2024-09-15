@@ -27,3 +27,4 @@ doc/api/
 .flutter-plugins
 
 ./android/hesab_ketab_upload_key_store.jks
+./android/key.properties
